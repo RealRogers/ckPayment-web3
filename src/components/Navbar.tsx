@@ -9,11 +9,12 @@ const Navbar = () => {
     <nav className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">ckP</span>
-          </div>
-          <span className="text-xl font-bold text-foreground">ckPayment</span>
+        <div className="flex items-center">
+          <img 
+            src="/lovable-uploads/42dcfff0-6a9c-4d69-908b-9729c5f9000b.png" 
+            alt="ckPayment Logo" 
+            className="h-8 w-auto"
+          />
         </div>
 
         {/* Navigation Links */}
