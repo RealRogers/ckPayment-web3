@@ -6,50 +6,50 @@
 
 @layer base {
   :root {
-    /* Dark mode as default */
-    --background: 222 84% 4%;
-    --foreground: 210 40% 95%;
+    /* ckPayment Dark Mode - Brand Colors from Logo */
+    --background: 0 0% 16%;           /* #2A2A2A - Gris Oscuro */
+    --foreground: 240 13% 97%;       /* #F5F5F7 - Gris Claro */
 
-    --card: 222 84% 6%;
-    --card-foreground: 210 40% 95%;
+    --card: 0 0% 18%;                /* Slightly lighter than background */
+    --card-foreground: 240 13% 97%; /* #F5F5F7 - Gris Claro */
 
-    --popover: 222 84% 6%;
-    --popover-foreground: 210 40% 95%;
+    --popover: 0 0% 18%;
+    --popover-foreground: 240 13% 97%;
 
-    /* Electric blue accent color inspired by tech tools */
-    --primary: 214 100% 51%;
-    --primary-foreground: 0 0% 100%;
+    /* Verde Principal del logo como primary */
+    --primary: 136 66% 62%;          /* #5DDE84 - Verde Principal */
+    --primary-foreground: 0 0% 16%;  /* Dark text on green */
 
-    --secondary: 217 33% 15%;
-    --secondary-foreground: 210 40% 95%;
+    --secondary: 0 0% 20%;           /* Darker gray for secondary elements */
+    --secondary-foreground: 240 13% 97%;
 
-    --muted: 217 33% 12%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 0 0% 14%;               /* Even darker for muted areas */
+    --muted-foreground: 0 0% 65%;    /* Medium gray for muted text */
 
-    --accent: 214 100% 51%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 136 66% 62%;           /* Same as primary - Verde Principal */
+    --accent-foreground: 0 0% 16%;   /* Dark text on green */
 
-    --destructive: 0 85% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 85% 60%;        /* Keep red for errors */
+    --destructive-foreground: 240 13% 97%;
 
-    --border: 217 33% 15%;
-    --input: 217 33% 15%;
-    --ring: 214 100% 51%;
+    --border: 0 0% 22%;              /* Subtle border color */
+    --input: 0 0% 20%;               /* Input background */
+    --ring: 136 66% 62%;             /* Verde Principal for focus rings */
 
     --radius: 0.75rem;
 
-    /* Tech-inspired gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(214 100% 51%), hsl(271 91% 65%));
-    --gradient-hero: linear-gradient(135deg, hsl(222 84% 4%) 0%, hsl(217 33% 8%) 100%);
-    --gradient-card: linear-gradient(135deg, hsl(222 84% 6%) 0%, hsl(217 33% 10%) 100%);
+    /* ckPayment brand gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(136 66% 62%), hsl(136 66% 55%));
+    --gradient-hero: linear-gradient(135deg, hsl(0 0% 16%) 0%, hsl(0 0% 12%) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 18%) 0%, hsl(0 0% 14%) 100%);
     
-    /* Code block styling */
-    --code-bg: 217 33% 8%;
-    --code-border: 217 33% 20%;
+    /* Code block styling with brand colors */
+    --code-bg: 0 0% 12%;
+    --code-border: 0 0% 25%;
     
-    /* Glow effects */
-    --glow-primary: 0 0 40px hsl(214 100% 51% / 0.3);
-    --glow-soft: 0 0 20px hsl(214 100% 51% / 0.1);
+    /* Green glow effects */
+    --glow-primary: 0 0 40px hsl(136 66% 62% / 0.3);
+    --glow-soft: 0 0 20px hsl(136 66% 62% / 0.1);
 
     /* Animation variables */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
