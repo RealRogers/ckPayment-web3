@@ -45,6 +45,9 @@ const Navbar = () => {
 
   const navItems = [
     { id: 'features', label: 'Features' },
+    { id: 'pricing', label: 'Pricing' },
+    { id: 'security', label: 'Security & Trust' },
+    { id: 'use-cases', label: 'Use Cases' },
     { id: 'how-it-works', label: 'How it Works' },
     { id: 'docs', label: 'Docs' },
     { id: 'community', label: 'Community' },

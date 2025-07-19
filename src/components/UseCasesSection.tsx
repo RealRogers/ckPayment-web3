@@ -160,7 +160,7 @@ const UseCasesSection = () => {
   ];
 
   return (
-    <section className="py-16 md:py-24 bg-background relative overflow-hidden">
+    <section id="use-cases" className="py-16 md:py-24 bg-background relative overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/5 to-background" />
       <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />

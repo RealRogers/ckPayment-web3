@@ -5,6 +5,7 @@ import ProblemCards from "./ProblemCards";
 import SolutionSection from "./SolutionSection";
 import SecurityTrustSection from "./SecurityTrustSection";
 import UseCasesSection from "./UseCasesSection";
+import PricingSection from "./PricingSection";
 import HowItWorksSection from "./HowItWorksSection";
 import GameChangerSection from "./GameChangerSection";
 import Footer from "./Footer";
@@ -33,6 +34,7 @@ const LandingPage = () => {
         </div>
         <SecurityTrustSection />
         <UseCasesSection />
+        <PricingSection />
         <div className="py-8 md:py-12">
           <HowItWorksSection />
         </div>
