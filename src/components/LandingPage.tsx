@@ -20,31 +20,35 @@ const LandingPage = () => {
       <Navbar />
       <main className="space-y-0">
         <HeroSection />
-        <div className="py-8 md:py-12">
+        <div className="py-12 md:py-16">
           <ProblemCards />
         </div>
-        <div className="py-8 md:py-12 bg-muted/10">
-          <ComparisonSection />
-        </div>
-        <div className="py-8 md:py-12">
+        <div className="py-12 md:py-16 bg-muted/10">
           <ProblemSection />
         </div>
-        <div className="py-8 md:py-12 bg-muted/30">
+        <div className="py-12 md:py-16">
           <SolutionSection />
         </div>
-        <SecurityTrustSection />
-        <UseCasesSection />
-        <PricingSection />
-        <div className="py-8 md:py-12">
+        <div className="py-12 md:py-16 bg-muted/30">
           <HowItWorksSection />
         </div>
-        <div className="py-8 md:py-12 bg-muted/30">
+        <div className="py-12 md:py-16">
           <IntegrationSteps />
         </div>
-        <div className="py-8 md:py-12">
-          <GameChangerSection />
+        <div className="py-12 md:py-16 bg-muted/10">
+          <ComparisonSection />
+        </div>
+        <GameChangerSection />
+        <div className="py-12 md:py-16 bg-muted/30">
+          <UseCasesSection />
+        </div>
+        <div className="py-12 md:py-16">
+          <SecurityTrustSection />
         </div>
         <div className="py-12 md:py-16 bg-muted/10">
+          <PricingSection />
+        </div>
+        <div className="py-12 md:py-16">
           <FAQSection />
         </div>
         <EnhancedCTASection />
