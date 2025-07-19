@@ -17,6 +17,10 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      'framer-motion': path.resolve(__dirname, 'node_modules/framer-motion'),
     },
+  },
+  optimizeDeps: {
+    include: ['framer-motion'],
   },
 }));

@@ -7,9 +7,9 @@ const GameChangerSection = () => {
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-8">
-            Más que Pagos:{" "}
+            More Than Payments:{" "}
             <span className="bg-gradient-primary bg-clip-text text-transparent">
-              Una Nueva Nube Descentralizada
+              A New Decentralized Cloud
             </span>
           </h2>
           
@@ -21,10 +21,10 @@ const GameChangerSection = () => {
             </div>
             
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-              ckPayment es la prueba de concepto de una idea más grande: alojar software complejo 
-              (SDKs, librerías, etc.) 100% on-chain. Demostramos que ICP puede funcionar como una 
-              nube descentralizada, abriendo la puerta a un futuro donde el software sea 
-              verdaderamente soberano y resistente.
+              ckPayment is a proof of concept for a bigger idea: hosting complex software 
+              (SDKs, libraries, etc.) 100% on-chain. We demonstrate that ICP can function as a 
+              decentralized cloud, opening the door to a future where software is 
+              truly sovereign and resilient.
             </p>
           </Card>
 
@@ -34,9 +34,9 @@ const GameChangerSection = () => {
               <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <Code className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">Software Soberano</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">Sovereign Software</h3>
               <p className="text-sm text-muted-foreground">
-                SDKs y librerías completamente independientes de infraestructura tradicional
+                SDKs and libraries completely independent of traditional infrastructure
               </p>
             </Card>
 
@@ -44,9 +44,9 @@ const GameChangerSection = () => {
               <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <Globe className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">Web3 Nativo</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">Native Web3</h3>
               <p className="text-sm text-muted-foreground">
-                Una nueva generación de aplicaciones verdaderamente descentralizadas
+                A new generation of truly decentralized applications
               </p>
             </Card>
           </div>

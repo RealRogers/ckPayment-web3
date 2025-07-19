@@ -5,20 +5,20 @@ const HowItWorksSection = () => {
   const steps = [
     {
       icon: Download,
-      title: "Importar",
-      description: "Añade el script de ckPayment a tu HTML.",
+      title: "Import",
+      description: "Add the ckPayment script to your HTML.",
       code: '<script src="https://ckpayment.icp0.io/ckpay.js"></script>'
     },
     {
       icon: Settings,
-      title: "Configurar",
-      description: "Inicializa el componente de pago con el ID de tu canister y el monto.",
+      title: "Configure",
+      description: "Initialize the payment component with your canister ID and amount.",
       code: 'ckPayment.init({ canisterId: "your-id", amount: 0.1 })'
     },
     {
       icon: CreditCard,
-      title: "Recibir Pagos",
-      description: "Empieza a aceptar pagos en ckBTC, ckETH y otros tokens de forma nativa.",
+      title: "Receive Payments",
+      description: "Start accepting payments in ckBTC, ckETH and other tokens natively.",
       code: 'ckPayment.createCheckout({ currency: "ckBTC" })'
     }
   ];
@@ -29,9 +29,9 @@ const HowItWorksSection = () => {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-6">
-              Empieza en{" "}
+              Get Started in{" "}
               <span className="bg-gradient-primary bg-clip-text text-transparent">
-                Menos de un Minuto
+                Less Than a Minute
               </span>
             </h2>
           </div>

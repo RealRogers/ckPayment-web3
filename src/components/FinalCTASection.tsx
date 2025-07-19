@@ -12,16 +12,16 @@ const FinalCTASection = () => {
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-6xl font-bold text-foreground mb-8 leading-tight">
-            ¿Listo para Construir el{" "}
+            Ready to Build the{" "}
             <span className="bg-gradient-primary bg-clip-text text-transparent">
-              Futuro de los Pagos en Web3?
+              Future of Web3 Payments?
             </span>
           </h2>
           
           <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
-            Únete a nuestra comunidad de desarrolladores pioneros que están redefiniendo 
-            lo que significa construir verdaderamente descentralizado. El futuro de los pagos 
-            comienza aquí, comienza ahora.
+            Join our community of pioneering developers who are redefining 
+            what it means to build truly decentralized. The future of payments 
+            starts here, starts now.
           </p>
 
           <Button 
@@ -29,14 +29,14 @@ const FinalCTASection = () => {
             className="bg-primary hover:bg-primary/90 text-primary-foreground px-12 py-6 text-xl shadow-glow-soft hover:shadow-glow-primary transition-all duration-300 group"
           >
             <BookOpen className="mr-3 h-6 w-6" />
-            Leer los Documentos y Empezar a Construir
+            Read the Documentation and Start Building
             <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform duration-300" />
           </Button>
 
           {/* Additional info */}
           <div className="mt-12 text-center">
             <p className="text-sm text-muted-foreground">
-              Comienza gratis • Sin tarjeta de crédito • Open Source
+              Start for free • No credit card required • Open Source
             </p>
           </div>
         </div>

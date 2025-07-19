@@ -7,16 +7,16 @@ const ProblemSection = () => {
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-8">
-            La Web Descentralizada Merece{" "}
+            The Decentralized Web Deserves{" "}
             <span className="bg-gradient-primary bg-clip-text text-transparent">
-              Pagos Nativamente Descentralizados
+              Natively Decentralized Payments
             </span>
           </h2>
           
           <p className="text-lg md:text-xl text-muted-foreground mb-12 leading-relaxed">
-            La mayoría de las soluciones de pago en Web3 aún dependen de servidores Web2 
-            para alojar sus componentes de frontend. Esto crea un punto central de fallo, 
-            rompe el paradigma "end-to-end" y limita el verdadero potencial de la web descentralizada.
+            Most Web3 payment solutions still rely on Web2 servers 
+            to host their frontend components. This creates a single point of failure, 
+            breaks the "end-to-end" paradigm, and limits the true potential of the decentralized web.
           </p>
 
           {/* Problem visualization */}
@@ -25,9 +25,9 @@ const ProblemSection = () => {
               <div className="w-12 h-12 bg-destructive/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <Server className="h-6 w-6 text-destructive" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">Dependencia Web2</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">Web2 Dependency</h3>
               <p className="text-sm text-muted-foreground">
-                Frontend alojado en servidores centralizados tradicionales
+                Frontend hosted on traditional centralized servers
               </p>
             </Card>
 
@@ -35,9 +35,9 @@ const ProblemSection = () => {
               <div className="w-12 h-12 bg-destructive/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <AlertTriangle className="h-6 w-6 text-destructive" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">Punto de Fallo</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">Single Point of Failure</h3>
               <p className="text-sm text-muted-foreground">
-                Si el servidor cae, toda la funcionalidad de pagos se pierde
+                If the server goes down, all payment functionality is lost
               </p>
             </Card>
 
@@ -45,9 +45,9 @@ const ProblemSection = () => {
               <div className="w-12 h-12 bg-destructive/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <Link className="h-6 w-6 text-destructive" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">Paradigma Roto</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">Broken Paradigm</h3>
               <p className="text-sm text-muted-foreground">
-                No es verdaderamente "end-to-end" descentralizado
+                Not truly decentralized "end-to-end"
               </p>
             </Card>
           </div>

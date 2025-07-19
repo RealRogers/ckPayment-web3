@@ -1,73 +1,285 @@
-# Welcome to your Lovable project
 
-## Project info
+# BitFabric: Crypto Accelerator Widget Extension Service
 
-**URL**: https://lovable.dev/projects/b3975014-7758-4d21-b80d-c012bd867c04
+Welcome to BitFabric, your next-generation crypto accelerator widget extension service. We provide a seamless layer for both Web 2.0 and Web 3.0 applications, enabling the hosting of crypto-commerce items and direct receipt of payments to a control wallet by the users of your services.
 
-## How can I edit this code?
+## What Can BitFabric Do For You?
 
-There are several ways of editing your application.
+With BitFabric deployed in your dApp using our Web 3.0 decentralized SDK, you and your users gain access to a myriad of accelerator features. Purchase and sell items with ease, and turn any dApp that deploys BitFabric into a potential marketplace. This empowers social creators to incubate interactions while BitFabric handles the heavy lifting.
 
-**Use Lovable**
+We achieve this by distributing a user-friendly interface of utilities through a Web 3.0 CDN JS framework.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/b3975014-7758-4d21-b80d-c012bd867c04) and start prompting.
+## Usage
 
-Changes made via Lovable will be committed automatically to this repo.
+To use SDK Name in your web application, follow these steps:
 
-**Use your preferred IDE**
+1. Include the following HTML markup in your document where you want to display the payment modal:
+    ```html
+        <div id="payment-modal"></div>
+    ```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+2. Add the following JavaScript code to your document, preferably inside a <script> tag or an external JavaScript file:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+   ```javascript
+   window.onload = function() {
+    var modalElement = document.getElementById('payment-modal');
+    ckPaySDK.PaymentComponent.renderPaymentModal(modalElement, { /* props go here */ });
+}
 ```
 
-**Edit a file directly in GitHub**
+Make sure to replace `{ /* props go here */ }` with the necessary configuration options for your payment component.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+You can customize the SDK integration as per your application's requirements. Refer to the SDK documentation for detailed information on available configuration options and APIs.
 
-**Use GitHub Codespaces**
+## Sample HTML Integration
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Here's an example of how you can integrate the SDK in a basic HTML page:
 
-## What technologies are used for this project?
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SDK Name HTML Integration</title>
+  <script src="https://cdkpay.dogeria.workers.dev/cdkPay.js"></script>
+</head>
+<body>
+  <div id="payment-modal"></div>
+  <script>
+    window.onload = function() {
+        var modalElement = document.getElementById('payment-modal');
+        ckPaySDK.PaymentComponent.renderPaymentModal(modalElement, { /* props go here */ });
+    }
+  </script>
+</body>
+</html>
+```
 
-This project is built with:
+## Sample React Integration
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Here's an example of how you can integrate the SDK in a React application:
 
-## How can I deploy this project?
+1. Install the SDK package using npm or yarn:
 
-Simply open [Lovable](https://lovable.dev/projects/b3975014-7758-4d21-b80d-c012bd867c04) and click on Share -> Publish.
+   `BASH COMMANDS GO HERE`
 
-## Can I connect a custom domain to my Lovable project?
+2. Import the SDK into your React component:
 
-Yes, you can!
+  ```javascript
+  import React from 'react'
+import { createRoot } from 'react-dom/client'
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+window.onload = function () {
+  ckPaySDK.PaymentComponent.initialize('payment-modal')
+}
+
+const App = () => {
+  const handlePayment = () => {
+    console.log('payment has been handle')
+  }
+
+  const startPaymentFlow = () => {
+    ckPaySDK.PaymentComponent.renderPaymentModal({}, function () {
+      console.log('Payment complete')
+      // hide the modal when payment is done
+      ckPaySDK.PaymentComponent.removePaymentModal()
+    })
+  }
+
+  return (
+    <div>
+      <h1>hello world</h1>
+      <button
+        onClick={() => {
+          ckPaySDK.PaymentComponent.renderPaymentModal({}, function () {
+            ckPaySDK.PaymentComponent.removePaymentModal()
+          })
+        }}
+      >
+        Pay in BTC
+      </button>
+    </div>
+  )
+}
+
+const container = document.getElementById('app')
+const root = createRoot(container)
+```
+# BitFabric Extension Documentation
+
+The BitFabric extension is a simple interface for adding items and profiles, purchasing items, and retrieving item details in a Web 3.0 marketplace. It simplifies the process by handling authentication and other backend tasks under the hood, allowing users to focus on frontend functionality.
+
+## Data Types
+
+### `Item`
+
+An item represents a product in the marketplace. When creating a new item, an `Item` object must contain the following properties:
+
+- `name`: (Text) The name of the item.
+- `cost`: (Nat) The cost of the item in the marketplace.
+- `available`: (Bool) Availability status of the item. If `true`, the item is available for purchase; if `false`, it's not.
+- `category`: (Text) The category the item belongs to.
+
+Example:
+
+```javascript
+let newItem = {
+  name: "Test Item",
+  cost: 500,
+  available: true,
+  category: "Electronics",
+};
+```
+
+The merchant field representing the merchant who is adding the item is automatically added by BitFabric. This field contains the Principal ID of the user who is currently authenticated. The Principal ID is a unique identifier generated based on the domain where BitFabric is deployed. This ensures that each dapp using BitFabric has unique user identifiers.
+
+Profile
+A profile represents a user in the marketplace. When creating a new profile, a Profile object must contain the following properties:
+
+profilePicture: (Blob) An optional property, representing the user's profile picture. It should be in the form of a binary data object.
+name: (Text) The name of the user.
+description: (Text) A description of the user.
+Example:
+
+```javascript
+let newProfile = {
+  profilePicture: "<Binary Data>",
+  name: "John Doe",
+  description: "A tech enthusiast",
+};
+```
+
+
+API Methods
+addItem(item)
+Adds a new item to the marketplace.
+
+Parameters:
+
+item: (Item) An Item object representing the item to add to the marketplace.
+Example:
+```javascript
+ckPaySDK.PaymentComponent.addItem(newItem);
+```
+addProfile(profile)
+
+Adds a new user profile.
+
+Parameters:
+
+profile: (Profile) A Profile object representing the user profile to add.
+Example:
+```javascript
+ckPaySDK.PaymentComponent.addProfile(newProfile);
+```
+
+buyItem(item)
+Buys an item from the marketplace.
+
+Parameters:
+
+item: (Nat) The id of the item to purchase.
+Example:
+```javascript
+ckPaySDK.PaymentComponent.buyItem(itemId);
+```
+
+getItem(item)
+Retrieves an item's details from the marketplace.
+
+Parameters:
+
+item: (Nat) The id of the item to retrieve.
+Example:
+```javascript
+ckPaySDK.PaymentComponent.getItem(itemId);
+```
+
+
+When BitFabric is deployed, it establishes a connection with your dapp and generates unique Principal IDs based on your domain. These Principal IDs are used to uniquely identify users in the system, allowing for safe and secure transactions.
+
+
+Customizing BitFabric Payment Widget
+The BitFabric payment widget provides a highly customizable interface for streamlining the payment flow. This document will guide you on how to use and customize the BitFabric widget in your application.
+
+Here's an example of how to customize the widget:
+```javascript
+window.onload = function () {
+  ckPaySDK.PaymentComponent.initialize('payment-modal', {
+    cardColor: "#123456",
+    gradientColor: "#789abc",
+    primaryColor: '#abcdef',
+    secondaryColor: '#ffffff',
+    steps: [
+      {
+        type: 'login',
+        title: 'Custom Login',
+        data: {
+          "type": "section",
+          "props": {},
+          "style": {},
+          "children": [
+            {
+              "type": "h1",
+              "props": {},
+              "style": { "color": "green", "textAlign": "center" },
+              "children": "Welcome Back!"
+            },
+            {
+              "type": "p",
+              "props": {},
+              "style": { "color": "black", "fontSize": "18px" },
+              "children": "We're glad to see you again. Let's make some magic happen!"
+            }
+          ]
+        }
+      },
+      {
+        type: 'confirmPaymentDetails',
+        title: 'Confirm Payment Details',
+        data: {
+          "type": "section",
+          "props": {},
+          "children": [
+            {
+              "type": "h1",
+              "props": {},
+              "children": "Invoice"
+            },
+            {
+              "type": "p",
+              "props": {},
+              "children": "Customer Name"
+            },
+            {
+              "type": "p",
+              "props": {},
+              "children": "Product: 'Cool Product'"
+            },
+            {
+              "type": "p",
+              "props": {},
+              "children": "Price: 0.00000100 BTC"
+            }
+          ]
+        }
+      }
+    ],
+  });
+}
+```
+Here is a breakdown of the different customization options:
+
+- `cardColor`: This defines the main color of the card.
+- `gradientColor`: This defines the gradient color of the card.
+- `primaryColor`: This defines the primary color of the texts and buttons.
+- `secondaryColor`: This defines the secondary color of the texts and buttons.
+- `steps`: This is an array that defines the steps of the payment flow. Each step is an object that has a `type`, `title`, and `data` property. `data` contains the content to be displayed on the step and can include nested elements.
+
+In the example above, we have two steps: 'login' and 'confirmPaymentDetails'. Each step has a custom title and data.
+
+The `type` field for the step is a string representing the type of the step. The `title` is the title for that particular step, and `data` is the contents of the step. In the `data`, you can specify a `type` (like 'section'), `props` for additional properties, `style` for the style of the section, and `children` for the nested elements inside the section.
+
+With these options, you can customize the payment flow according to your application's requirements.
+
