@@ -74,7 +74,7 @@ function PaymentButton() {
                 <div className="h-3 w-3 rounded-full bg-primary absolute -left-1.5 transform -translate-y-1/2" />
               </div>
               
-              <Card className="p-4 sm:p-6 bg-background/50 backdrop-blur-sm border-border/30 hover:border-primary/30 transition-colors">
+              <Card className="p-4 sm:p-6 bg-card/80 backdrop-blur-sm border-border/30 hover:border-primary/30 hover:bg-card/90 transition-all duration-300">
                 <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1">
                     <div className="flex items-center">

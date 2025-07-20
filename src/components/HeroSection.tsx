@@ -55,7 +55,7 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative min-h-screen bg-gradient-to-b from-background to-background/95">
+    <section id="hero" className="relative min-h-screen bg-gradient-to-b from-background to-background/95">
       {/* Animated Background */}
       <AnimatedBackground />
       

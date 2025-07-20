@@ -77,7 +77,7 @@ const FAQSection = () => {
             filteredFAQs.map((faq, index) => (
               <motion.div 
                 key={index}
-                className="border border-border/30 rounded-xl overflow-hidden bg-background/50 backdrop-blur-sm"
+                className="border border-border/30 rounded-xl overflow-hidden bg-card/80 backdrop-blur-sm hover:bg-card/90 transition-colors duration-300"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}

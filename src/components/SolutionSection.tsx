@@ -1,5 +1,6 @@
-import { Blocks, Rocket, Shield, Zap, Globe, Code2, CheckCircle, ArrowRight } from "lucide-react";
+import { Blocks, Rocket, Shield, Zap, Globe, Code2, CheckCircle, ArrowRight, ExternalLink } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Link } from "react-router-dom";
 
 const SolutionSection = () => {
   const mainFeatures = [
@@ -30,7 +31,7 @@ const SolutionSection = () => {
   ];
 
   return (
-    <section id="features" className="relative py-20 bg-gradient-to-br from-background via-muted/20 to-background overflow-hidden">
+    <section id="features" className="relative py-20 bg-gradient-to-br from-background via-muted/20 to-background overflow-hidden scroll-mt-20">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute inset-0" style={{
@@ -57,6 +58,15 @@ const SolutionSection = () => {
               The first truly decentralized payment gateway that runs entirely on the Internet Computer. 
               No servers, no downtime, no single points of failure.
             </p>
+            <div className="mt-8">
+              <Link 
+                to="/features" 
+                className="inline-flex items-center space-x-2 text-primary hover:text-primary/80 transition-colors font-medium"
+              >
+                <span>View All Features in Detail</span>
+                <ExternalLink className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
 
           {/* Main Features Grid */}

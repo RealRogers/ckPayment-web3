@@ -14,7 +14,7 @@ const GameChangerSection = () => {
             </span>
           </h2>
           
-          <div className="bg-card border border-border/30 p-8 mb-12 shadow-sm rounded-xl">
+          <div className="bg-card/80 backdrop-blur-sm border border-border/30 p-8 mb-12 shadow-sm rounded-xl hover:bg-card/90 transition-all duration-300">
             <div className="flex justify-center mb-6">
               <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center">
                 <Cloud className="h-8 w-8 text-primary" />
@@ -30,7 +30,7 @@ const GameChangerSection = () => {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-card border border-border/30 p-6 text-center hover:shadow-md transition-shadow rounded-lg">
+            <div className="bg-card/80 backdrop-blur-sm border border-border/30 p-6 text-center hover:bg-card/90 hover:shadow-md transition-all duration-300 rounded-lg">
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <Code className="h-6 w-6 text-primary" />
               </div>
@@ -40,7 +40,7 @@ const GameChangerSection = () => {
               </p>
             </div>
 
-            <div className="bg-card border border-border/30 p-6 text-center hover:shadow-md transition-shadow rounded-lg">
+            <div className="bg-card/80 backdrop-blur-sm border border-border/30 p-6 text-center hover:bg-card/90 hover:shadow-md transition-all duration-300 rounded-lg">
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <Globe className="h-6 w-6 text-primary" />
               </div>

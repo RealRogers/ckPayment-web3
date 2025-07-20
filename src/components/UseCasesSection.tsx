@@ -214,7 +214,7 @@ const UseCasesSection = () => {
           {industries.map((industry, index) => {
             const IconComponent = industry.icon;
             return (
-              <Card key={index} className="bg-background/50 backdrop-blur-sm border border-border/30 hover:border-primary/30 transition-all duration-300 group overflow-hidden">
+              <Card key={index} className="bg-card/80 backdrop-blur-sm border border-border/30 hover:border-primary/30 hover:bg-card/90 transition-all duration-300 group overflow-hidden">
                 <CardContent className="p-0">
                   {/* Header with gradient */}
                   <div className={`bg-gradient-to-r ${industry.color} p-6 text-white`}>

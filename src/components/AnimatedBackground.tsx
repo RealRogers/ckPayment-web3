@@ -29,8 +29,8 @@ const AnimatedBackground = () => {
       const hexHeight = size * 2;
       const hexWidth = Math.sqrt(3) / 2 * hexHeight;
       
-      ctx.strokeStyle = 'rgba(99, 102, 241, 0.1)';
-      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(99, 102, 241, 0.05)';
+      ctx.lineWidth = 0.5;
       
       // Draw hex grid
       for (let y = -hexHeight; y < height + hexHeight; y += hexHeight * 0.75) {
@@ -75,7 +75,7 @@ const AnimatedBackground = () => {
         this.size = Math.random() * 3 + 1;
         this.speedX = Math.random() * 2 - 1;
         this.speedY = Math.random() * 2 - 1;
-        this.color = `rgba(74, 222, 128, ${Math.random() * 0.5 + 0.2})`;
+        this.color = `rgba(74, 222, 128, ${Math.random() * 0.3 + 0.1})`;
       }
 
       update() {
@@ -106,7 +106,7 @@ const AnimatedBackground = () => {
       if (!ctx) return;
       
       // Clear canvas with slight transparency for trail effect
-      ctx.fillStyle = 'rgba(10, 10, 20, 0.1)';
+      ctx.fillStyle = 'rgba(10, 10, 20, 0.05)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
       // Draw hex grid
@@ -124,8 +124,8 @@ const AnimatedBackground = () => {
           const distance = Math.sqrt(dx * dx + dy * dy);
           
           if (distance < 100) {
-            ctx.strokeStyle = `rgba(74, 222, 128, ${1 - distance/100})`;
-            ctx.lineWidth = 0.5;
+            ctx.strokeStyle = `rgba(74, 222, 128, ${(1 - distance/100) * 0.3})`;
+            ctx.lineWidth = 0.3;
             ctx.beginPath();
             ctx.moveTo(particle.x, particle.y);
             ctx.lineTo(otherParticle.x, otherParticle.y);
@@ -149,8 +149,9 @@ const AnimatedBackground = () => {
   return (
     <canvas 
       ref={canvasRef} 
-      className="fixed inset-0 w-full h-full pointer-events-none"
+      className="fixed inset-0 w-full h-full pointer-events-none opacity-40"
       aria-hidden="true"
+      style={{ zIndex: 1 }}
     />
   );
 };

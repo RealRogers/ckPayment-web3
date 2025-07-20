@@ -1,5 +1,8 @@
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import HeroSection from "./HeroSection";
+import ScrollIndicator from "./ScrollIndicator";
 import ProblemSection from "./ProblemSection";
 import ProblemCards from "./ProblemCards";
 import SolutionSection from "./SolutionSection";
@@ -15,9 +18,102 @@ import FAQSection from "./FAQSection";
 import EnhancedCTASection from "./EnhancedCTASection";
 
 const LandingPage = () => {
+  const location = useLocation();
+
+  // Ensure page starts at top and handle hash navigation
+  useEffect(() => {
+    // Add loading class to prevent smooth scroll during load
+    document.documentElement.classList.add('loading');
+    
+    // Disable browser's scroll restoration
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+
+    // Force immediate scroll to top
+    window.scrollTo(0, 0);
+
+    // If there's a hash in the URL, handle it properly
+    if (location.hash) {
+      // Wait for the page to render, then scroll to the hash
+      const timer = setTimeout(() => {
+        document.documentElement.classList.remove('loading');
+        const element = document.getElementById(location.hash.substring(1));
+        if (element) {
+          const navbarHeight = 80;
+          const elementPosition = element.offsetTop - navbarHeight;
+          window.scrollTo({
+            top: elementPosition,
+            behavior: 'smooth'
+          });
+        }
+      }, 300);
+      return () => {
+        clearTimeout(timer);
+        document.documentElement.classList.remove('loading');
+      };
+    } else {
+      // No hash, ensure we start at the top
+      const timer = setTimeout(() => {
+        document.documentElement.classList.remove('loading');
+      }, 500);
+      
+      return () => {
+        clearTimeout(timer);
+        document.documentElement.classList.remove('loading');
+      };
+    }
+  }, [location.hash, location.pathname]);
+
+  // Additional effect to prevent any unwanted scrolling during component mounting
+  useEffect(() => {
+    const preventScroll = () => {
+      if (window.scrollY > 0 && !location.hash) {
+        window.scrollTo(0, 0);
+      }
+    };
+
+    // Immediate scroll to top
+    preventScroll();
+
+    // Check scroll position multiple times during initial load
+    const intervals = [10, 50, 100, 200, 500].map(delay => 
+      setTimeout(preventScroll, delay)
+    );
+
+    return () => {
+      intervals.forEach(clearTimeout);
+    };
+  }, [location.hash]);
+
+  // Handle navigation from other pages
+  useEffect(() => {
+    if (location.pathname === '/' && !location.hash) {
+      window.scrollTo(0, 0);
+    }
+  }, [location.pathname, location.hash]);
+
+  // Ensure scroll to top on page load/refresh
+  useEffect(() => {
+    const handleLoad = () => {
+      if (!location.hash) {
+        window.scrollTo(0, 0);
+      }
+    };
+
+    // If page is already loaded
+    if (document.readyState === 'complete') {
+      handleLoad();
+    } else {
+      window.addEventListener('load', handleLoad);
+      return () => window.removeEventListener('load', handleLoad);
+    }
+  }, [location.hash]);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
+      <ScrollIndicator />
       <main className="space-y-0">
         <HeroSection />
         <div className="py-12 md:py-16">

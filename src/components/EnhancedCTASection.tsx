@@ -1,8 +1,31 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Github, ExternalLink, Send, ArrowRight, Zap } from 'lucide-react';
+import { Github, ExternalLink, Send, ArrowRight, Zap, BookOpen } from 'lucide-react';
 import { Button } from './ui/button';
 import ParticleNetwork from './ui/ParticleNetwork';
+
+// Animation variants for staggered children
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { 
+    opacity: 1, 
+    y: 0,
+    transition: {
+      duration: 0.6
+    }
+  }
+};
 
 export default function EnhancedCTASection() {
   const [isVisible, setIsVisible] = useState(false);
@@ -12,160 +35,258 @@ export default function EnhancedCTASection() {
   const [isScrolled, setIsScrolled] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
-  // Check if mobile
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+  // Check if mobile with debounce
+  const checkMobile = useCallback(() => {
+    setIsMobile(window.innerWidth < 768);
   }, []);
 
-  // Handle scroll for fixed mobile CTA
-  useEffect(() => {
-    if (!isMobile) return;
-
-    const handleScroll = () => {
-      if (!sectionRef.current) return;
-      
-      const rect = sectionRef.current.getBoundingClientRect();
-      const isInView = rect.top <= window.innerHeight && rect.bottom >= 0;
-      
-      // Only show fixed CTA when section is not in view
-      setIsScrolled(!isInView);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+  // Handle scroll for fixed mobile CTA with throttling
+  const handleScroll = useCallback(() => {
+    if (!sectionRef.current || !isMobile) return;
+    
+    const rect = sectionRef.current.getBoundingClientRect();
+    const isInView = rect.top <= window.innerHeight && rect.bottom >= 0;
+    setIsScrolled(!isInView);
   }, [isMobile]);
+
+  // Effect for mobile detection and scroll
+  useEffect(() => {
+    checkMobile();
+    
+    const onResize = () => {
+      checkMobile();
+    };
+    
+    window.addEventListener('resize', onResize);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [checkMobile, handleScroll]);
 
   // Intersection Observer for animation
   useEffect(() => {
+    if (!sectionRef.current) return;
+    
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
         }
       },
-      {
-        threshold: 0.1,
-      }
+      { threshold: 0.1, rootMargin: '0px 0px -100px 0px' }
     );
 
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
-      }
-    };
+    observer.observe(sectionRef.current);
+    return () => observer.disconnect();
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateEmail = (email: string) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
-      console.log('Submitted email:', email);
+    setError('');
+    
+    if (!email) {
+      setError('Email is required');
+      return;
+    }
+    
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email');
+      return;
+    }
+    
+    try {
+      setIsSubmitting(true);
+      // Replace with actual API call
+      console.log('Submitting email:', email);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       setIsSubmitted(true);
       setEmail('');
+      
       // Reset form after 5 seconds
       setTimeout(() => {
         setIsSubmitted(false);
       }, 5000);
+    } catch (err) {
+      setError('Failed to submit. Please try again.');
+      console.error('Submission error:', err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const renderMainCTA = () => (
-    <div className="relative z-10 max-w-4xl mx-auto text-center px-6 py-12 md:py-20">
-      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-6">
-        <Zap className="h-8 w-8 text-green-600" fill="currentColor" />
-      </div>
-      
-      <motion.h2 
-        className="text-3xl md:text-5xl font-bold text-green-500 mb-4"
-        initial={{ opacity: 0, y: 20 }}
-        animate={isVisible ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.6, delay: 0.2 }}
-      >
-        Ready to Build the Future of Payments?
-      </motion.h2>
-      
-      <motion.p 
-        className="text-lg md:text-xl text-green-100 mb-8 max-w-2xl mx-auto"
-        initial={{ opacity: 0, y: 20 }}
-        animate={isVisible ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.6, delay: 0.3 }}
-      >
-        Join the decentralized payment revolution. Build with ckPayment today and be part of the Web3 financial infrastructure.
-      </motion.p>
-
+    <motion.div 
+      className="relative z-10 max-w-6xl mx-auto text-center px-6 py-16 md:py-24"
+      variants={containerVariants}
+      initial="hidden"
+      animate={isVisible ? "show" : "hidden"}
+    >
+      {/* Decorative elements */}
       <motion.div 
-        className="flex flex-col sm:flex-row gap-4 justify-center"
-        initial={{ opacity: 0, y: 20 }}
-        animate={isVisible ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.6, delay: 0.4 }}
+        className="absolute -top-10 right-10 w-32 h-32 bg-blue-500/20 rounded-full filter blur-3xl -z-10"
+        animate={{
+          scale: [1, 1.1, 1],
+          opacity: [0.8, 1, 0.8],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          repeatType: "reverse",
+        }}
+      />
+      
+      {/* Main Content */}
+      <motion.div variants={itemVariants} className="mb-12">
+        <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 mb-6">
+          <Zap className="h-10 w-10 text-primary" fill="currentColor" />
+        </div>
+        
+        <h2 className="text-4xl md:text-6xl font-bold text-foreground mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
+          Ready to Build the Future of Payments?
+        </h2>
+        
+        <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+          Join the decentralized payment revolution today. No credit card required.
+        </p>
+      </motion.div>
+
+      {/* CTA Buttons */}
+      <motion.div 
+        className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
+        variants={itemVariants}
       >
         <Button 
-          asChild 
-          size="lg"
-          className="bg-lime-400 hover:bg-lime-500 text-gray-900 font-bold text-lg px-8 py-6 group relative overflow-hidden"
+          size="lg" 
+          className="group relative overflow-hidden px-8 py-6 text-lg font-semibold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
         >
-          <a href="https://github.com/your-org/ckpayment" target="_blank" rel="noopener noreferrer">
-            <span className="relative z-10 flex items-center">
-              Get Started <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-lime-400 to-green-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          </a>
+          <span className="relative z-10 flex items-center">
+            Get Started for Free
+            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+          </span>
+          <span className="absolute inset-0 bg-gradient-to-r from-primary/80 to-accent/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
         </Button>
         
         <Button 
-          asChild 
           variant="outline" 
           size="lg"
-          className="bg-transparent border-green-300 text-green-100 hover:bg-green-800/50 hover:text-white text-lg px-8 py-6"
+          className="group relative overflow-hidden px-8 py-6 text-lg font-medium border-2 border-border/30 bg-background/50 backdrop-blur-sm hover:bg-accent/5 hover:border-accent/50 text-foreground transition-all duration-300"
         >
-          <a href="#demo" className="flex items-center">
-            <ExternalLink className="mr-2 h-5 w-5" />
-            View Demo
-          </a>
+          <span className="relative z-10 flex items-center">
+            <BookOpen className="mr-2 h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+            View Documentation
+          </span>
         </Button>
       </motion.div>
 
+      {/* Trust Badge */}
       <motion.div 
-        className="mt-8 flex flex-wrap justify-center gap-6"
-        initial={{ opacity: 0, y: 20 }}
-        animate={isVisible ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.6, delay: 0.5 }}
+        className="mb-12"
+        variants={itemVariants}
       >
-        <a 
-          href="https://github.com/your-org/ckpayment" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="flex items-center text-green-200 hover:text-white transition-colors"
-          aria-label="View on GitHub"
-        >
-          <Github className="h-5 w-5 mr-2" />
-          <span>GitHub</span>
-        </a>
-        <a 
-          href="https://docs.ckpayment.xyz" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="flex items-center text-green-200 hover:text-white transition-colors"
-          aria-label="View Documentation"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-          </svg>
-          <span>Documentation</span>
-        </a>
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted/30 text-sm text-muted-foreground">
+          <div className="flex -space-x-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border-2 border-background" />
+            ))}
+          </div>
+          <span>Trusted by 1,000+ developers</span>
+        </div>
       </motion.div>
-    </div>
+
+      {/* Email Form */}
+      <motion.div 
+        className="bg-card/80 backdrop-blur-sm rounded-2xl p-8 max-w-2xl mx-auto border border-border/30 shadow-xl"
+        variants={itemVariants}
+      >
+        <h3 className="text-2xl font-semibold text-foreground mb-2">Get Early Access</h3>
+        <p className="text-muted-foreground mb-6">Be the first to know when we launch</p>
+        
+        <form onSubmit={handleSubmit} ref={formRef} className="space-y-4">
+          <div className="relative">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (error) setError('');
+              }}
+              placeholder="Enter your email"
+              className={`w-full px-6 py-4 rounded-xl bg-background/50 border ${
+                error ? 'border-destructive' : 'border-border/50'
+              } text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent shadow-sm transition-all duration-200`}
+              disabled={isSubmitting || isSubmitted}
+              aria-label="Email address"
+              aria-invalid={!!error}
+              aria-describedby={error ? 'email-error' : undefined}
+            />
+            {error && (
+              <p id="email-error" className="mt-2 text-sm text-destructive">
+                {error}
+              </p>
+            )}
+          </div>
+          
+          <Button 
+            type="submit"
+            size="lg"
+            className="w-full py-6 text-base font-medium bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white transition-all duration-300"
+            disabled={isSubmitting || isSubmitted}
+          >
+            {isSubmitting ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processing...
+              </>
+            ) : isSubmitted ? (
+              <>
+                <svg className="w-5 h-5 mr-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                You're on the list!
+              </>
+            ) : (
+              'Get Early Access'
+            )}
+          </Button>
+        </form>
+        
+        <p className="mt-4 text-xs text-muted-foreground text-center">
+          We respect your privacy. Unsubscribe at any time.
+        </p>
+      </motion.div>
+      
+      {/* Trust Badges */}
+      <motion.div 
+        className="mt-12 pt-8 border-t border-border/20"
+        variants={itemVariants}
+      >
+        <p className="text-sm text-muted-foreground mb-4">TRUSTED BY INNOVATORS AT</p>
+        <div className="flex flex-wrap justify-center items-center gap-8 opacity-70">
+          {['DFINITY', 'Internet Computer', 'Web3 Foundation', 'ICDevs'].map((company, i) => (
+            <div key={i} className="text-muted-foreground/60 hover:text-foreground transition-colors">
+              {company}
+            </div>
+          ))}
+        </div>
+      </motion.div>
+    </motion.div>
   );
 
   const renderFixedMobileCTA = () => (

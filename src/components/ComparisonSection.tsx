@@ -46,7 +46,7 @@ const ComparisonSection = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {/* Web2 Column */}
           <div className="space-y-6">
-            <Card className="p-6 bg-background/50 backdrop-blur-sm border-red-500/20 hover:border-red-500/40 transition-colors h-full">
+            <Card className="p-6 bg-card/80 backdrop-blur-sm border-red-500/20 hover:border-red-500/40 hover:bg-card/90 transition-all duration-300 h-full">
               <div className="text-center mb-6">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-500/10 text-red-500 mb-4">
                   <X className="h-6 w-6" />
@@ -80,7 +80,7 @@ const ComparisonSection = () => {
 
           {/* ckPayment Column */}
           <div className="space-y-6">
-            <Card className="p-6 bg-background/50 backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-colors h-full">
+            <Card className="p-6 bg-card/80 backdrop-blur-sm border-primary/20 hover:border-primary/40 hover:bg-card/90 transition-all duration-300 h-full">
               <div className="text-center mb-6">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary mb-4">
                   <Zap className="h-6 w-6" fill="currentColor" />
