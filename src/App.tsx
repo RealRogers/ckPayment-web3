@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Features from "./pages/Features";
 import HowItWorks from "./pages/HowItWorks";
+import StartBuilding from "./pages/StartBuilding";
 import ECommerce from "./pages/ECommerce";
 import Gaming from "./pages/Gaming";
 import DeFi from "./pages/DeFi";
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/features" element={<Features />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/start-building" element={<StartBuilding />} />
           <Route path="/ecommerce" element={<ECommerce />} />
           <Route path="/gaming" element={<Gaming />} />
           <Route path="/defi" element={<DeFi />} />

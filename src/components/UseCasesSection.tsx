@@ -298,9 +298,11 @@ const UseCasesSection = () => {
                 Our SDK adapts to your specific needs and use cases.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="bg-gradient-to-r from-primary to-accent hover:opacity-90">
-                  Start Building Today
-                  <ArrowRight className="h-5 w-5 ml-2" />
+                <Button asChild size="lg" className="bg-gradient-to-r from-primary to-accent hover:opacity-90">
+                  <Link to="/start-building">
+                    Start Building Today
+                    <ArrowRight className="h-5 w-5 ml-2" />
+                  </Link>
                 </Button>
                 <Button variant="outline" size="lg">
                   Talk to Our Team
