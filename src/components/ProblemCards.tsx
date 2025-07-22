@@ -39,7 +39,7 @@ const ProblemCards = () => {
           {cards.map((card, index) => (
             <Card 
               key={index}
-              className={`p-6 bg-card/80 backdrop-blur-sm border ${card.borderColor} hover:shadow-lg transition-all duration-300 h-full flex flex-col hover:bg-card/90`}
+              className={`p-6 bg-background/50 backdrop-blur-sm border ${card.borderColor} hover:shadow-lg transition-all duration-300 h-full flex flex-col`}
             >
               <div className="w-16 h-16 rounded-xl bg-opacity-20 flex items-center justify-center mb-4 mx-auto" style={{ backgroundColor: `${card.borderColor.replace('border-', '').replace('/30', '')}20` }}>
                 {card.icon}

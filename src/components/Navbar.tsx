@@ -103,7 +103,7 @@ const Navbar = () => {
 
   const navItems = [
     { id: 'features', label: 'Features', hasPage: true },
-    { id: 'how-it-works', label: 'How it Works', hasPage: false },
+    { id: 'how-it-works', label: 'How it Works', hasPage: true },
     { id: 'use-cases', label: 'Use Cases', hasPage: false },
     { id: 'security', label: 'Security & Trust', hasPage: false },
     { id: 'pricing', label: 'Pricing', hasPage: false },
@@ -130,32 +130,35 @@ const Navbar = () => {
               const isActive = location.pathname === '/' && activeSection === item.id;
               const isFeaturePage = location.pathname === '/features' && item.id === 'features';
               
-              if (item.id === 'features') {
+              if (item.hasPage) {
+                const isCurrentPage = (item.id === 'features' && location.pathname === '/features') || 
+                                    (item.id === 'how-it-works' && location.pathname === '/how-it-works');
+                
                 return (
                   <div key={item.id} className="relative group">
                     <button 
                       onClick={() => scrollToSection(item.id)}
                       className={`text-muted-foreground hover:text-foreground transition-colors flex items-center space-x-1 ${
-                        isActive || isFeaturePage ? 'text-primary' : ''
+                        isActive || isCurrentPage ? 'text-primary' : ''
                       }`}
                       aria-label={`Navigate to ${item.label} section`}
                     >
                       <span>{item.label}</span>
                     </button>
-                    {/* Dropdown for Features */}
+                    {/* Dropdown for pages with both section and dedicated page */}
                     <div className="absolute top-full left-0 mt-2 w-48 bg-background/95 backdrop-blur-lg border border-border/30 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                       <div className="p-2">
                         <button
-                          onClick={() => scrollToSection('features')}
+                          onClick={() => scrollToSection(item.id)}
                           className="w-full text-left px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-md transition-colors"
                         >
                           View on Homepage
                         </button>
                         <Link
-                          to="/features"
+                          to={`/${item.id}`}
                           className="w-full text-left px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-md transition-colors flex items-center space-x-2"
                         >
-                          <span>Detailed Features</span>
+                          <span>Detailed {item.label}</span>
                           <ExternalLink className="h-3 w-3" />
                         </Link>
                       </div>
@@ -214,23 +217,26 @@ const Navbar = () => {
               const isActive = location.pathname === '/' && activeSection === item.id;
               const isFeaturePage = location.pathname === '/features' && item.id === 'features';
               
-              if (item.id === 'features') {
+              if (item.hasPage) {
+                const isCurrentPage = (item.id === 'features' && location.pathname === '/features') || 
+                                    (item.id === 'how-it-works' && location.pathname === '/how-it-works');
+                
                 return (
                   <div key={item.id} className="space-y-2">
                     <button
                       onClick={() => scrollToSection(item.id)}
                       className={`py-3 px-4 text-left hover:bg-muted rounded-md transition-colors w-full ${
-                        isActive || isFeaturePage ? 'text-primary bg-muted/50' : 'text-foreground'
+                        isActive || isCurrentPage ? 'text-primary bg-muted/50' : 'text-foreground'
                       }`}
                       aria-label={`Go to ${item.label}`}
                     >
                       {item.label}
                     </button>
                     <Link
-                      to="/features"
+                      to={`/${item.id}`}
                       className="py-2 px-6 text-left hover:bg-muted rounded-md transition-colors text-muted-foreground text-sm flex items-center space-x-2"
                     >
-                      <span>View Detailed Features</span>
+                      <span>View Detailed {item.label}</span>
                       <ExternalLink className="h-3 w-3" />
                     </Link>
                   </div>

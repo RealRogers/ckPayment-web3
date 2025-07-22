@@ -3,7 +3,6 @@ import { useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import HeroSection from "./HeroSection";
 import ScrollIndicator from "./ScrollIndicator";
-import ProblemSection from "./ProblemSection";
 import ProblemCards from "./ProblemCards";
 import SolutionSection from "./SolutionSection";
 import SecurityTrustSection from "./SecurityTrustSection";
@@ -120,9 +119,6 @@ const LandingPage = () => {
           <ProblemCards />
         </div>
         <div className="py-12 md:py-16 bg-muted/10">
-          <ProblemSection />
-        </div>
-        <div className="py-12 md:py-16">
           <SolutionSection />
         </div>
         <div className="py-12 md:py-16 bg-muted/30">

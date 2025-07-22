@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import { 
   ShoppingCart, 
   Gamepad2, 
@@ -12,7 +13,8 @@ import {
   CheckCircle,
   Zap,
   Globe,
-  Users
+  Users,
+  ExternalLink
 } from "lucide-react";
 
 const UseCasesSection = () => {
@@ -267,9 +269,15 @@ const UseCasesSection = () => {
                     </div>
 
                     {/* CTA */}
-                    <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                      Explore {industry.title} Solutions
-                      <ArrowRight className="h-4 w-4 ml-2" />
+                    <Button 
+                      asChild
+                      variant="outline" 
+                      className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+                    >
+                      <Link to={industry.title === 'E-Commerce' ? '/ecommerce' : industry.title === 'Gaming' ? '/gaming' : industry.title === 'DeFi' ? '/defi' : industry.title === 'NFT Marketplaces' ? '/nft-marketplaces' : industry.title === 'Education' ? '/education' : industry.title === 'Creator Economy' ? '/creator-economy' : '#'}>
+                        Explore {industry.title} Solutions
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </Link>
                     </Button>
                   </div>
                 </CardContent>

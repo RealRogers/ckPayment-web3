@@ -178,18 +178,6 @@
     }
   }
 
-  /* Enhanced card backgrounds */
-  .card-enhanced {
-    background: hsl(var(--card) / 0.8);
-    backdrop-filter: blur(8px);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .card-enhanced:hover {
-    background: hsl(var(--card) / 0.9);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  }
-
   /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 8px;

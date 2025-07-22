@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
-import { Download, Settings, CreditCard } from "lucide-react";
+import { Download, Settings, CreditCard, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const HowItWorksSection = () => {
   const steps = [
@@ -34,6 +35,15 @@ const HowItWorksSection = () => {
                 Less Than a Minute
               </span>
             </h2>
+            <div className="mt-8">
+              <Link 
+                to="/how-it-works" 
+                className="inline-flex items-center space-x-2 text-primary hover:text-primary/80 transition-colors font-medium"
+              >
+                <span>View All How it Works in Detail</span>
+                <ExternalLink className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
