@@ -24,7 +24,7 @@ const ProblemCards = () => {
   ];
 
   return (
-    <section className="py-20 bg-background">
+    <section className="relative py-20 bg-background z-10">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -39,7 +39,7 @@ const ProblemCards = () => {
           {cards.map((card, index) => (
             <Card 
               key={index}
-              className={`p-6 bg-background/50 backdrop-blur-sm border ${card.borderColor} hover:shadow-lg transition-all duration-300 h-full flex flex-col`}
+              className={`p-6 bg-background/80 backdrop-blur-sm border ${card.borderColor} hover:shadow-lg transition-all duration-300 h-full flex flex-col relative z-10`}
             >
               <div className="w-16 h-16 rounded-xl bg-opacity-20 flex items-center justify-center mb-4 mx-auto" style={{ backgroundColor: `${card.borderColor.replace('border-', '').replace('/30', '')}20` }}>
                 {card.icon}

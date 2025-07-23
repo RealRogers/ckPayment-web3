@@ -78,12 +78,11 @@ const StartBuilding = () => {
       {/* Animated Background */}
       <AnimatedBackground />
       
-      {/* Content Overlay */}
-      <div className="absolute inset-0 bg-background/20 pointer-events-none" style={{ zIndex: 5 }} />
+      {/* Content Overlay - Removed opacity to make AnimatedBackground more visible */}
       
       <main className="relative z-10 pt-20">
-        {/* Hero Section */}
-        <section className="py-20 bg-gradient-to-br from-background/90 via-muted/10 to-background/90 overflow-hidden">
+        {/* Hero Section - Reduced background opacity to show AnimatedBackground */}
+        <section className="py-20 bg-gradient-to-br from-background/50 via-transparent to-background/50 overflow-hidden">
           <div className="container mx-auto px-4">
             <div className="text-center max-w-4xl mx-auto">
               <Badge variant="outline" className="mb-6 border-primary/30 text-primary bg-primary/5 backdrop-blur-sm">
@@ -120,22 +119,22 @@ const StartBuilding = () => {
 
               {/* Quick Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
-                <div className="text-center p-4 rounded-lg bg-background/50 backdrop-blur-sm border border-border/30">
+                <div className="text-center p-4 rounded-lg bg-background/20 backdrop-blur-sm border border-border/30">
                   <Zap className="h-6 w-6 text-yellow-500 mx-auto mb-2" />
                   <div className="text-2xl font-bold">5min</div>
                   <div className="text-sm text-muted-foreground">Setup Time</div>
                 </div>
-                <div className="text-center p-4 rounded-lg bg-background/50 backdrop-blur-sm border border-border/30">
+                <div className="text-center p-4 rounded-lg bg-background/20 backdrop-blur-sm border border-border/30">
                   <Shield className="h-6 w-6 text-green-500 mx-auto mb-2" />
                   <div className="text-2xl font-bold">99.9%</div>
                   <div className="text-sm text-muted-foreground">Uptime</div>
                 </div>
-                <div className="text-center p-4 rounded-lg bg-background/50 backdrop-blur-sm border border-border/30">
+                <div className="text-center p-4 rounded-lg bg-background/20 backdrop-blur-sm border border-border/30">
                   <Globe className="h-6 w-6 text-blue-500 mx-auto mb-2" />
                   <div className="text-2xl font-bold">200+</div>
                   <div className="text-sm text-muted-foreground">Countries</div>
                 </div>
-                <div className="text-center p-4 rounded-lg bg-background/50 backdrop-blur-sm border border-border/30">
+                <div className="text-center p-4 rounded-lg bg-background/20 backdrop-blur-sm border border-border/30">
                   <Users className="h-6 w-6 text-purple-500 mx-auto mb-2" />
                   <div className="text-2xl font-bold">50K+</div>
                   <div className="text-sm text-muted-foreground">Developers</div>
@@ -145,8 +144,8 @@ const StartBuilding = () => {
           </div>
         </section>
 
-        {/* Integration Options Section */}
-        <section className="py-20 bg-gradient-to-b from-muted/5 to-background">
+        {/* Integration Options Section - Reduced background opacity */}
+        <section className="py-20 bg-gradient-to-b from-transparent to-transparent">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <Badge variant="outline" className="mb-4">
@@ -163,7 +162,7 @@ const StartBuilding = () => {
 
             <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {/* JavaScript SDK */}
-              <Card className="p-6 bg-card/80 backdrop-blur-sm border-border/30 hover:border-primary/30 hover:shadow-xl transition-all duration-300 group">
+              <Card className="p-6 bg-card/30 backdrop-blur-sm border-border/30 hover:border-primary/30 hover:shadow-xl transition-all duration-300 group">
                 <CardContent className="p-0">
                   <div className="text-center mb-6">
                     <div className="inline-flex p-4 rounded-2xl bg-blue-500/10 mb-4 group-hover:bg-blue-500/20 transition-colors">
@@ -239,7 +238,7 @@ payment.createCheckout({
               </Card>
 
               {/* REST API */}
-              <Card className="p-6 bg-card/80 backdrop-blur-sm border-border/30 hover:border-primary/30 hover:shadow-xl transition-all duration-300 group">
+              <Card className="p-6 bg-card/30 backdrop-blur-sm border-border/30 hover:border-primary/30 hover:shadow-xl transition-all duration-300 group">
                 <CardContent className="p-0">
                   <div className="text-center mb-6">
                     <div className="inline-flex p-4 rounded-2xl bg-green-500/10 mb-4 group-hover:bg-green-500/20 transition-colors">
@@ -309,7 +308,7 @@ payment.createCheckout({
               </Card>
 
               {/* React Components */}
-              <Card className="p-6 bg-card/80 backdrop-blur-sm border-border/30 hover:border-primary/30 hover:shadow-xl transition-all duration-300 group">
+              <Card className="p-6 bg-card/30 backdrop-blur-sm border-border/30 hover:border-primary/30 hover:shadow-xl transition-all duration-300 group">
                 <CardContent className="p-0">
                   <div className="text-center mb-6">
                     <div className="inline-flex p-4 rounded-2xl bg-purple-500/10 mb-4 group-hover:bg-purple-500/20 transition-colors">
@@ -389,8 +388,8 @@ function App() {
           </div>
         </section>
 
-        {/* Quick Start Guide Section */}
-        <section className="py-20">
+        {/* Quick Start Guide Section - Transparent background */}
+        <section className="py-20 bg-transparent">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <Badge variant="outline" className="mb-4">
@@ -408,7 +407,7 @@ function App() {
             <div className="max-w-4xl mx-auto">
               <div className="space-y-8">
                 {/* Step 1 */}
-                <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/30">
+                <Card className="p-6 bg-card/20 backdrop-blur-sm border-border/30">
                   <div className="flex flex-col md:flex-row gap-6 items-start">
                     <div className="flex-shrink-0">
                       <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold">
@@ -441,7 +440,7 @@ function App() {
                 </Card>
 
                 {/* Step 2 */}
-                <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/30">
+                <Card className="p-6 bg-card/20 backdrop-blur-sm border-border/30">
                   <div className="flex flex-col md:flex-row gap-6 items-start">
                     <div className="flex-shrink-0">
                       <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold">
@@ -484,7 +483,7 @@ const payment = ckPayment.init({
                 </Card>
 
                 {/* Step 3 */}
-                <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/30">
+                <Card className="p-6 bg-card/20 backdrop-blur-sm border-border/30">
                   <div className="flex flex-col md:flex-row gap-6 items-start">
                     <div className="flex-shrink-0">
                       <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold">
@@ -535,7 +534,7 @@ window.location.href = checkout.url;`}</code>
                 </Card>
 
                 {/* Step 4 */}
-                <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/30">
+                <Card className="p-6 bg-card/20 backdrop-blur-sm border-border/30">
                   <div className="flex flex-col md:flex-row gap-6 items-start">
                     <div className="flex-shrink-0">
                       <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold">
@@ -588,7 +587,7 @@ window.location.href = checkout.url;`}</code>
 
               {/* Next Steps */}
               <div className="mt-12 text-center">
-                <Card className="p-8 bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
+                <Card className="p-8 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20 backdrop-blur-sm">
                   <h3 className="text-2xl font-bold mb-4">🎉 You're Ready to Go!</h3>
                   <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
                     You've successfully integrated ckPayment. Now explore advanced features, 
@@ -610,8 +609,8 @@ window.location.href = checkout.url;`}</code>
           </div>
         </section>
 
-        {/* Resources Section */}
-        <section className="py-20 bg-gradient-to-b from-muted/5 to-background">
+        {/* Resources Section - Reduced background opacity */}
+        <section className="py-20 bg-gradient-to-b from-transparent to-transparent">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <Badge variant="outline" className="mb-4">
@@ -628,7 +627,7 @@ window.location.href = checkout.url;`}</code>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
               {/* API Documentation */}
-              <Card className="p-6 bg-card/80 backdrop-blur-sm border-border/30 hover:border-primary/30 hover:shadow-lg transition-all duration-300 group">
+              <Card className="p-6 bg-card/30 backdrop-blur-sm border-border/30 hover:border-primary/30 hover:shadow-lg transition-all duration-300 group">
                 <div className="text-center mb-4">
                   <div className="inline-flex p-3 rounded-xl bg-blue-500/10 mb-3 group-hover:bg-blue-500/20 transition-colors">
                     <BookOpen className="h-6 w-6 text-blue-500" />
@@ -659,7 +658,7 @@ window.location.href = checkout.url;`}</code>
               </Card>
 
               {/* SDK Documentation */}
-              <Card className="p-6 bg-card/80 backdrop-blur-sm border-border/30 hover:border-primary/30 hover:shadow-lg transition-all duration-300 group">
+              <Card className="p-6 bg-card/30 backdrop-blur-sm border-border/30 hover:border-primary/30 hover:shadow-lg transition-all duration-300 group">
                 <div className="text-center mb-4">
                   <div className="inline-flex p-3 rounded-xl bg-green-500/10 mb-3 group-hover:bg-green-500/20 transition-colors">
                     <Code className="h-6 w-6 text-green-500" />
@@ -690,7 +689,7 @@ window.location.href = checkout.url;`}</code>
               </Card>
 
               {/* Code Examples */}
-              <Card className="p-6 bg-card/80 backdrop-blur-sm border-border/30 hover:border-primary/30 hover:shadow-lg transition-all duration-300 group">
+              <Card className="p-6 bg-card/30 backdrop-blur-sm border-border/30 hover:border-primary/30 hover:shadow-lg transition-all duration-300 group">
                 <div className="text-center mb-4">
                   <div className="inline-flex p-3 rounded-xl bg-purple-500/10 mb-3 group-hover:bg-purple-500/20 transition-colors">
                     <Github className="h-6 w-6 text-purple-500" />
@@ -816,7 +815,7 @@ window.location.href = checkout.url;`}</code>
 
             {/* Featured Resource */}
             <div className="mt-12 max-w-4xl mx-auto">
-              <Card className="p-8 bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
+              <Card className="p-8 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20 backdrop-blur-sm">
                 <div className="text-center">
                   <div className="inline-flex p-4 rounded-2xl bg-primary/10 mb-4">
                     <Star className="h-8 w-8 text-primary" />
@@ -854,7 +853,7 @@ window.location.href = checkout.url;`}</code>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mb-12">
               {/* Live Chat */}
-              <Card className="p-6 text-center bg-card/80 backdrop-blur-sm border-border/30 hover:border-primary/30 hover:shadow-lg transition-all duration-300 group">
+              <Card className="p-6 text-center bg-card/30 backdrop-blur-sm border-border/30 hover:border-primary/30 hover:shadow-lg transition-all duration-300 group">
                 <div className="inline-flex p-4 rounded-2xl bg-green-500/10 mb-4 group-hover:bg-green-500/20 transition-colors">
                   <MessageCircle className="h-8 w-8 text-green-500" />
                 </div>
@@ -869,7 +868,7 @@ window.location.href = checkout.url;`}</code>
               </Card>
 
               {/* Email Support */}
-              <Card className="p-6 text-center bg-card/80 backdrop-blur-sm border-border/30 hover:border-primary/30 hover:shadow-lg transition-all duration-300 group">
+              <Card className="p-6 text-center bg-card/30 backdrop-blur-sm border-border/30 hover:border-primary/30 hover:shadow-lg transition-all duration-300 group">
                 <div className="inline-flex p-4 rounded-2xl bg-blue-500/10 mb-4 group-hover:bg-blue-500/20 transition-colors">
                   <Mail className="h-8 w-8 text-blue-500" />
                 </div>
@@ -884,7 +883,7 @@ window.location.href = checkout.url;`}</code>
               </Card>
 
               {/* Community Forum */}
-              <Card className="p-6 text-center bg-card/80 backdrop-blur-sm border-border/30 hover:border-primary/30 hover:shadow-lg transition-all duration-300 group">
+              <Card className="p-6 text-center bg-card/30 backdrop-blur-sm border-border/30 hover:border-primary/30 hover:shadow-lg transition-all duration-300 group">
                 <div className="inline-flex p-4 rounded-2xl bg-purple-500/10 mb-4 group-hover:bg-purple-500/20 transition-colors">
                   <Users className="h-8 w-8 text-purple-500" />
                 </div>
@@ -899,7 +898,7 @@ window.location.href = checkout.url;`}</code>
               </Card>
 
               {/* Documentation */}
-              <Card className="p-6 text-center bg-card/80 backdrop-blur-sm border-border/30 hover:border-primary/30 hover:shadow-lg transition-all duration-300 group">
+              <Card className="p-6 text-center bg-card/30 backdrop-blur-sm border-border/30 hover:border-primary/30 hover:shadow-lg transition-all duration-300 group">
                 <div className="inline-flex p-4 rounded-2xl bg-orange-500/10 mb-4 group-hover:bg-orange-500/20 transition-colors">
                   <BookOpen className="h-8 w-8 text-orange-500" />
                 </div>
@@ -919,7 +918,7 @@ window.location.href = checkout.url;`}</code>
               <h3 className="text-2xl font-bold text-center mb-8">Choose Your Support Level</h3>
               <div className="grid md:grid-cols-3 gap-6">
                 {/* Community Support */}
-                <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/30">
+                <Card className="p-6 bg-card/20 backdrop-blur-sm border-border/30">
                   <div className="text-center mb-6">
                     <h4 className="text-lg font-bold mb-2">Community</h4>
                     <div className="text-3xl font-bold mb-2">Free</div>
@@ -951,7 +950,7 @@ window.location.href = checkout.url;`}</code>
                 </Card>
 
                 {/* Developer Support */}
-                <Card className="p-6 bg-card/50 backdrop-blur-sm border-primary/30 relative">
+                <Card className="p-6 bg-card/20 backdrop-blur-sm border-primary/30 relative">
                   <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                     Most Popular
                   </Badge>
@@ -986,7 +985,7 @@ window.location.href = checkout.url;`}</code>
                 </Card>
 
                 {/* Enterprise Support */}
-                <Card className="p-6 bg-card/50 backdrop-blur-sm border-border/30">
+                <Card className="p-6 bg-card/20 backdrop-blur-sm border-border/30">
                   <div className="text-center mb-6">
                     <h4 className="text-lg font-bold mb-2">Enterprise</h4>
                     <div className="text-3xl font-bold mb-2">Custom</div>
@@ -1021,7 +1020,7 @@ window.location.href = checkout.url;`}</code>
 
             {/* Emergency Support */}
             <div className="mt-12 max-w-2xl mx-auto">
-              <Card className="p-6 bg-gradient-to-r from-red-500/10 to-orange-500/10 border-red-500/20">
+              <Card className="p-6 bg-gradient-to-r from-red-500/15 to-orange-500/15 border-red-500/20 backdrop-blur-sm">
                 <div className="text-center">
                   <div className="inline-flex p-3 rounded-xl bg-red-500/10 mb-4">
                     <Zap className="h-6 w-6 text-red-500" />

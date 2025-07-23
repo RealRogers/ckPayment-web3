@@ -15,6 +15,7 @@ import IntegrationSteps from "./IntegrationSteps";
 import ComparisonSection from "./ComparisonSection";
 import FAQSection from "./FAQSection";
 import EnhancedCTASection from "./EnhancedCTASection";
+import AnimatedBackground from "./AnimatedBackground";
 
 const LandingPage = () => {
   const location = useLocation();
@@ -113,35 +114,58 @@ const LandingPage = () => {
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
       <ScrollIndicator />
-      <main className="space-y-0">
+      <AnimatedBackground />
+      <main className="relative z-10 space-y-0">
         <HeroSection />
-        <div className="py-12 md:py-16">
-          <ProblemCards />
+        <div className="relative py-12 md:py-16">
+          <div className="relative z-20">
+            <ProblemCards />
+          </div>
         </div>
-        <div className="py-12 md:py-16 bg-muted/10">
-          <SolutionSection />
+        <div className="relative py-12 md:py-16">
+          <div className="relative z-20">
+            <SolutionSection />
+          </div>
         </div>
-        <div className="py-12 md:py-16 bg-muted/30">
-          <HowItWorksSection />
+        <div className="relative py-12 md:py-16">
+          <div className="relative z-20">
+            <HowItWorksSection />
+          </div>
         </div>
-        <div className="py-12 md:py-16">
-          <IntegrationSteps />
+        <div className="relative py-12 md:py-16">
+          <div className="relative z-20">
+            <IntegrationSteps />
+          </div>
         </div>
-        <div className="py-12 md:py-16 bg-muted/10">
-          <ComparisonSection />
+        <div className="relative py-12 md:py-16">
+          <div className="relative z-20">
+            <ComparisonSection />
+          </div>
         </div>
-        <GameChangerSection />
-        <div className="py-12 md:py-16 bg-muted/30">
-          <UseCasesSection />
+        <div className="relative">
+          <div className="relative z-20">
+            <GameChangerSection />
+          </div>
         </div>
-        <div className="py-12 md:py-16">
-          <SecurityTrustSection />
+        <div className="relative py-12 md:py-16">
+          <div className="relative z-20">
+            <UseCasesSection />
+          </div>
         </div>
-        <div className="py-12 md:py-16 bg-muted/10">
-          <PricingSection />
+        <div className="relative py-12 md:py-16">
+          <div className="relative z-20">
+            <SecurityTrustSection />
+          </div>
         </div>
-        <div className="py-12 md:py-16">
-          <FAQSection />
+        <div className="relative py-12 md:py-16">
+          <div className="relative z-20">
+            <PricingSection />
+          </div>
+        </div>
+        <div className="relative py-12 md:py-16">
+          <div className="relative z-20">
+            <FAQSection />
+          </div>
         </div>
         <EnhancedCTASection />
       </main>

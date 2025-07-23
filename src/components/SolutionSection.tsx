@@ -31,9 +31,9 @@ const SolutionSection = () => {
   ];
 
   return (
-    <section id="features" className="relative py-20 bg-gradient-to-br from-background via-muted/20 to-background overflow-hidden scroll-mt-20">
+    <section id="features" className="relative py-20 bg-gradient-to-br from-background/70 via-muted/10 to-background/70 overflow-hidden scroll-mt-20">
       {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
+      <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0" style={{
           backgroundImage: `radial-gradient(circle at 25% 25%, #10b981 0%, transparent 50%), 
                            radial-gradient(circle at 75% 75%, #3b82f6 0%, transparent 50%)`
@@ -74,7 +74,7 @@ const SolutionSection = () => {
             {mainFeatures.map((feature, index) => {
               const IconComponent = feature.icon;
               return (
-                <Card key={index} className="relative bg-card/80 backdrop-blur-sm border border-border/50 p-8 text-center group hover:scale-105 hover:shadow-2xl transition-all duration-500">
+                <Card key={index} className="relative bg-card/50 backdrop-blur-sm border border-border/50 p-8 text-center group hover:scale-105 hover:shadow-2xl transition-all duration-500">
                   {/* Highlight Badge */}
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                     <span className="bg-gradient-to-r from-primary to-accent text-white px-3 py-1 rounded-full text-xs font-semibold">
@@ -105,7 +105,7 @@ const SolutionSection = () => {
           </div>
 
           {/* Additional Features */}
-          <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/30 p-8">
+          <div className="bg-card/30 backdrop-blur-sm rounded-2xl border border-border/30 p-8">
             <h3 className="text-2xl font-bold text-center text-foreground mb-8">
               Built for the Future of Web3
             </h3>
