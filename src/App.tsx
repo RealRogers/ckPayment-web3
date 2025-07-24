@@ -13,6 +13,7 @@ import DeFi from "./pages/DeFi";
 import NFTMarketplaces from "./pages/NFTMarketplaces";
 import Education from "./pages/Education";
 import CreatorEconomy from "./pages/CreatorEconomy";
+import ProfileManagement from "./pages/ProfileManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,8 @@ const App = () => (
           <Route path="/nft-marketplaces" element={<NFTMarketplaces />} />
           <Route path="/education" element={<Education />} />
           <Route path="/creator-economy" element={<CreatorEconomy />} />
+          <Route path="/profile-management" element={<ProfileManagement />} />
+          <Route path="/ProfileManagement" element={<ProfileManagement />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

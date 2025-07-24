@@ -1,6 +1,6 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Home, ArrowLeft, Search } from "lucide-react";
@@ -17,38 +17,41 @@ const NotFound = () => {
     );
   }, [location.pathname]);
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0, y: 50 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
         duration: 0.6,
-        ease: "easeOut",
+        ease: [0.16, 1, 0.3, 1],
         staggerChildren: 0.2
       }
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: "easeOut" }
+      transition: { 
+        duration: 0.5, 
+        ease: [0.16, 1, 0.3, 1] 
+      }
     }
   };
 
-  const numberVariants = {
+  const numberVariants: Variants = {
     hidden: { scale: 0.5, opacity: 0 },
     visible: {
       scale: 1,
       opacity: 1,
       transition: {
-        duration: 0.8,
-        ease: "easeOut",
         type: "spring",
-        stiffness: 100
+        stiffness: 100,
+        damping: 15,
+        duration: 0.8
       }
     }
   };

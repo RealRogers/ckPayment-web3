@@ -265,9 +265,14 @@ const ProfileManagement: React.FC = () => {
   }, [isDialogOpen, userProfile, setValue]);
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="min-h-screen w-full bg-gradient-to-br from-background via-background/95 to-muted/20 flex items-center justify-center p-4">
+      {/* Background Animation */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <ConnectedNodes animate={showConnectedNodes} />
+      </div>
+      
       {/* Main Profile Card */}
-      <Card className="bg-white border-green-200 shadow-lg hover:shadow-xl transition-shadow duration-300">
+      <Card className="relative z-10 w-full max-w-2xl bg-background/80 backdrop-blur-lg border-border/50 shadow-2xl hover:shadow-3xl transition-all duration-500">
         <CardHeader className="text-center pb-4">
           <div className="relative mx-auto mb-4">
             <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center">

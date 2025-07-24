@@ -31,6 +31,42 @@ const FAQSection = () => {
     {
       question: "How does the decentralized architecture benefit me?",
       answer: "Decentralization means no single entity controls the network, ensuring your payment system remains operational 24/7 without risk of censorship or service interruption."
+    },
+    {
+      question: "What cryptocurrencies does ckPayment support?",
+      answer: "ckPayment supports a range of cryptocurrencies within the ICP ecosystem, making it compatible with both native and cross-chain assets. These include: ICP (the native token of the Internet Computer), ckBTC (a Bitcoin variant on ICP), ckETH (an Ethereum variant on ICP), and USDC (upcoming). This selection ensures compatibility with major blockchain networks while leveraging ICP's infrastructure for efficiency."
+    },
+    {
+      question: "Is ckPayment quantum-resistant or future-proof against emerging threats?",
+      answer: "ckPayment, built on the Internet Computer Protocol (ICP), is poised to benefit from ICP's efforts to adopt post-quantum cryptography. While specific quantum-resistance features of ckPayment aren't explicitly detailed, its reliance on ICP suggests it will inherit these advancements, positioning it as potentially future-proof against emerging threats like quantum attacks."
+    },
+    {
+      question: "How does ckPayment ensure compliance with regulations (e.g., KYC/AML)?",
+      answer: "ckPayment adheres to Know Your Customer (KYC) and Anti-Money Laundering (AML) regulations to operate legally across over 200 countries. This includes identity verification for users to meet KYC standards and transaction monitoring for AML compliance. The platform is also working towards PCI DSS compliance, demonstrating its commitment to regulatory alignment while maintaining its Web3 framework."
+    },
+    {
+      question: "What happens if there's a dispute or I need a refund?",
+      answer: "In ckPayment's decentralized setup, dispute resolution and refunds are handled differently from traditional systems. The platform utilizes smart contracts to automate transaction terms and conditions, and may employ escrow services to hold funds until disputes are resolved. The process might involve decentralized governance or community arbitration, so users should review transaction terms carefully as the process may differ from centralized payment platforms."
+    },
+    {
+      question: "How does ckPayment support cross-chain transactions?",
+      answer: "ckPayment enables seamless cross-chain transactions through its integration with ckBTC and ckETH, which connect to Bitcoin and Ethereum networks directly on ICP. This is achieved via chain-key cryptography, allowing ICP smart contracts to interact with raw Bitcoin and Ethereum assets without requiring traditional bridges. The result is fast finality with transactions settling in 1-2 seconds with minimal costs."
+    },
+    {
+      question: "Where can I find API documentation and developer resources?",
+      answer: "As an open-source project, ckPayment provides comprehensive developer resources including API documentation, SDK references, and code examples. These resources are available on the project's GitHub repository (github.com/cultureic/ckPayment) and through the official website's developer portal, which includes guides and tutorials for integration."
+    },
+    {
+      question: "Can ckPayment be used for fiat conversions or hybrid Web2/Web3 payments?",
+      answer: "While ckPayment primarily focuses on cryptocurrency payments, it supports fiat conversions and hybrid Web2/Web3 payments through third-party integrations. These integrations can convert crypto payments to fiat for merchants, bridging the gap between traditional finance and blockchain-based transactions."
+    },
+    {
+      question: "What kind of customer support does ckPayment offer?",
+      answer: "ckPayment offers a community-driven support model typical of Web3 projects. This includes community forums for peer-to-peer assistance, GitHub issues for technical support and bug reporting, and potentially direct support channels for key users. The platform also provides comprehensive self-service documentation to help users find answers to common questions."
+    },
+    {
+      question: "Are there any limitations or known issues with ckPayment?",
+      answer: "As with any decentralized payment system, ckPayment has certain considerations: users should be aware of cryptocurrency price volatility, the need for compatible wallets, and varying regulatory requirements across different jurisdictions. Additionally, as a developing platform, some features might be in beta or experimental stages. These factors should be considered when evaluating ckPayment for specific use cases."
     }
   ];
 
