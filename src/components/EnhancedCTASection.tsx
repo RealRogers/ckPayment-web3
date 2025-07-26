@@ -315,6 +315,7 @@ export default function EnhancedCTASection() {
     <>
       <section 
         ref={sectionRef}
+        id="get-started"
         className="relative overflow-hidden bg-gradient-to-br from-green-900 to-green-800 text-white"
       >
         {/* Particle Network Background */}

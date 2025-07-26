@@ -52,19 +52,19 @@ const SecurityTrustSection = () => {
       icon: Globe,
       value: "99.9%",
       label: "Network Uptime",
-      description: "Powered by ICP's decentralized infrastructure"
+      description: "Leveraging ICP's decentralized advantage (vs. Stripe's ~99.95% with centralized servers)"
     },
     {
       icon: Users,
-      value: "10K+",
+      value: "150+",
       label: "Developers Trust Us",
-      description: "Growing community of Web3 builders"
+      description: "Growing community of Web3 builders (vs. Stripe's thousands)"
     },
     {
       icon: Zap,
-      value: "$50M+",
+      value: "10,000+",
       label: "Transactions Secured",
-      description: "Total value processed safely"
+      description: "Test transactions secured (vs. Stripe's $1 billion), emphasizing security over scale"
     }
   ];
 

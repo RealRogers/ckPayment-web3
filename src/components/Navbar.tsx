@@ -16,15 +16,17 @@ const Navbar = () => {
       setIsMenuOpen(false);
       return;
     }
-    
+
     if (id === 'community') {
       window.open('https://github.com/ckpayment', '_blank');
       setIsMenuOpen(false);
       return;
     }
 
+    setIsMenuOpen(false);
+
     // If we're not on the home page and trying to navigate to a section, go to home first
-    if (location.pathname !== '/' && ['features', 'how-it-works', 'use-cases', 'security', 'pricing'].includes(id)) {
+    if (location.pathname !== '/' && ['hero', 'features', 'how-it-works', 'use-cases', 'security', 'pricing', 'faq', 'get-started'].includes(id)) {
       window.location.href = `/#${id}`;
       return;
     }
@@ -34,13 +36,20 @@ const Navbar = () => {
     if (element) {
       const navbarHeight = 80; // Height of fixed navbar
       const elementPosition = element.offsetTop - navbarHeight;
-      
+
       window.scrollTo({
         top: elementPosition,
         behavior: 'smooth'
       });
+    } else {
+      console.warn(`Element with id "${id}" not found`);
+      // If element not found, try to navigate to home with hash
+      if (location.pathname === '/') {
+        window.location.hash = id;
+      } else {
+        window.location.href = `/#${id}`;
+      }
     }
-    setIsMenuOpen(false);
   };
 
   // Close menu when clicking outside
@@ -55,7 +64,7 @@ const Navbar = () => {
     if (isMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
-    
+
     // Clean up
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
@@ -69,7 +78,7 @@ const Navbar = () => {
     } else {
       document.body.style.overflow = 'unset';
     }
-    
+
     return () => {
       document.body.style.overflow = 'unset';
     };
@@ -80,9 +89,9 @@ const Navbar = () => {
     if (location.pathname !== '/') return;
 
     const handleScroll = () => {
-      const sections = ['features', 'how-it-works', 'use-cases', 'security', 'pricing'];
+      const sections = ['hero', 'features', 'how-it-works', 'use-cases', 'security', 'pricing', 'faq', 'get-started'];
       const navbarHeight = 80;
-      
+
       for (const sectionId of sections) {
         const element = document.getElementById(sectionId);
         if (element) {
@@ -97,7 +106,7 @@ const Navbar = () => {
 
     window.addEventListener('scroll', handleScroll);
     handleScroll(); // Check initial position
-    
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, [location.pathname]);
 
@@ -107,6 +116,7 @@ const Navbar = () => {
     { id: 'use-cases', label: 'Use Cases', hasPage: false },
     { id: 'security', label: 'Security & Trust', hasPage: false },
     { id: 'pricing', label: 'Pricing', hasPage: false },
+    { id: 'faq', label: 'FAQ', hasPage: false },
     { id: 'docs', label: 'Docs', hasPage: false, external: true },
     { id: 'community', label: 'Community', hasPage: false, external: true },
   ];
@@ -117,9 +127,9 @@ const Navbar = () => {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <img 
-              src="/lovable-uploads/42dcfff0-6a9c-4d69-908b-9729c5f9000b.png" 
-              alt="ckPayment Logo" 
+            <img
+              src="/lovable-uploads/42dcfff0-6a9c-4d69-908b-9729c5f9000b.png"
+              alt="ckPayment Logo"
               className="h-8 w-auto hover:opacity-80 transition-opacity"
             />
           </Link>
@@ -129,51 +139,30 @@ const Navbar = () => {
             {navItems.map((item) => {
               const isActive = location.pathname === '/' && activeSection === item.id;
               const isFeaturePage = location.pathname === '/features' && item.id === 'features';
-              
+
               if (item.hasPage) {
-                const isCurrentPage = (item.id === 'features' && location.pathname === '/features') || 
-                                    (item.id === 'how-it-works' && location.pathname === '/how-it-works');
-                
+                const isCurrentPage = (item.id === 'features' && location.pathname === '/features') ||
+                  (item.id === 'how-it-works' && location.pathname === '/how-it-works');
+
                 return (
-                  <div key={item.id} className="relative group">
-                    <button 
-                      onClick={() => scrollToSection(item.id)}
-                      className={`text-muted-foreground hover:text-foreground transition-colors flex items-center space-x-1 ${
-                        isActive || isCurrentPage ? 'text-primary' : ''
+                  <Link
+                    key={item.id}
+                    to={`/${item.id}`}
+                    className={`text-muted-foreground hover:text-foreground transition-colors flex items-center space-x-1 ${isActive || isCurrentPage ? 'text-primary' : ''
                       }`}
-                      aria-label={`Navigate to ${item.label} section`}
-                    >
-                      <span>{item.label}</span>
-                    </button>
-                    {/* Dropdown for pages with both section and dedicated page */}
-                    <div className="absolute top-full left-0 mt-2 w-48 bg-background/95 backdrop-blur-lg border border-border/30 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                      <div className="p-2">
-                        <button
-                          onClick={() => scrollToSection(item.id)}
-                          className="w-full text-left px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-md transition-colors"
-                        >
-                          View on Homepage
-                        </button>
-                        <Link
-                          to={`/${item.id}`}
-                          className="w-full text-left px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-md transition-colors flex items-center space-x-2"
-                        >
-                          <span>Detailed {item.label}</span>
-                          <ExternalLink className="h-3 w-3" />
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
+                    aria-label={`Navigate to ${item.label} section`}
+                  >
+                    <span>{item.label}</span>
+                  </Link>
                 );
               }
-              
+
               return (
-                <button 
+                <button
                   key={item.id}
                   onClick={() => scrollToSection(item.id)}
-                  className={`text-muted-foreground hover:text-foreground transition-colors flex items-center space-x-1 ${
-                    isActive ? 'text-primary' : ''
-                  }`}
+                  className={`text-muted-foreground hover:text-foreground transition-colors flex items-center space-x-1 ${isActive ? 'text-primary' : ''
+                    }`}
                   aria-label={`Navigate to ${item.label} section`}
                 >
                   <span>{item.label}</span>
@@ -185,7 +174,7 @@ const Navbar = () => {
 
           <div className="flex items-center space-x-4">
             {/* Mobile Menu Button */}
-            <button 
+            <button
               className="md:hidden p-2 rounded-md text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-label="Toggle menu"
@@ -195,7 +184,7 @@ const Navbar = () => {
             </button>
 
             {/* CTA Button - Hidden on mobile when menu is open */}
-            <Button 
+            <Button
               className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-glow-soft hover:shadow-glow-primary transition-all duration-300 hidden md:inline-flex"
               onClick={() => scrollToSection('get-started')}
               aria-label="Get started with ckPayment"
@@ -208,7 +197,7 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div 
+        <div
           ref={menuRef}
           className="fixed inset-0 top-16 bg-background z-40 p-4 md:hidden animate-in fade-in duration-200"
         >
@@ -216,18 +205,17 @@ const Navbar = () => {
             {navItems.map((item) => {
               const isActive = location.pathname === '/' && activeSection === item.id;
               const isFeaturePage = location.pathname === '/features' && item.id === 'features';
-              
+
               if (item.hasPage) {
-                const isCurrentPage = (item.id === 'features' && location.pathname === '/features') || 
-                                    (item.id === 'how-it-works' && location.pathname === '/how-it-works');
-                
+                const isCurrentPage = (item.id === 'features' && location.pathname === '/features') ||
+                  (item.id === 'how-it-works' && location.pathname === '/how-it-works');
+
                 return (
                   <div key={item.id} className="space-y-2">
                     <button
                       onClick={() => scrollToSection(item.id)}
-                      className={`py-3 px-4 text-left hover:bg-muted rounded-md transition-colors w-full ${
-                        isActive || isCurrentPage ? 'text-primary bg-muted/50' : 'text-foreground'
-                      }`}
+                      className={`py-3 px-4 text-left hover:bg-muted rounded-md transition-colors w-full ${isActive || isCurrentPage ? 'text-primary bg-muted/50' : 'text-foreground'
+                        }`}
                       aria-label={`Go to ${item.label}`}
                     >
                       {item.label}
@@ -242,14 +230,13 @@ const Navbar = () => {
                   </div>
                 );
               }
-              
+
               return (
                 <button
                   key={item.id}
                   onClick={() => scrollToSection(item.id)}
-                  className={`py-3 px-4 text-left hover:bg-muted rounded-md transition-colors flex items-center space-x-2 ${
-                    isActive ? 'text-primary bg-muted/50' : 'text-foreground'
-                  }`}
+                  className={`py-3 px-4 text-left hover:bg-muted rounded-md transition-colors flex items-center space-x-2 ${isActive ? 'text-primary bg-muted/50' : 'text-foreground'
+                    }`}
                   aria-label={`Go to ${item.label}`}
                 >
                   <span>{item.label}</span>
@@ -257,7 +244,7 @@ const Navbar = () => {
                 </button>
               );
             })}
-            <Button 
+            <Button
               className="mt-4 w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-glow-soft hover:shadow-glow-primary transition-all duration-300"
               onClick={() => scrollToSection('get-started')}
               aria-label="Get started with ckPayment"

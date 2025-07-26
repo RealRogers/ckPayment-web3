@@ -17,86 +17,78 @@ import FAQSection from "./FAQSection";
 import EnhancedCTASection from "./EnhancedCTASection";
 import AnimatedBackground from "./AnimatedBackground";
 
-const LandingPage = () => {
-  const location = useLocation();
+// Constants
+const NAVBAR_HEIGHT = 80;
+const SCROLL_DELAY = 100; // ms
+const HASH_SCROLL_DELAY = 300; // ms
 
-  // Ensure page starts at top and handle hash navigation
-  useEffect(() => {
-    // Add loading class to prevent smooth scroll during load
-    document.documentElement.classList.add('loading');
+/**
+ * Scrolls to an element with optional offset
+ * @param elementId - The ID of the element to scroll to
+ * @param offset - Optional offset from the top (default: 0)
+ */
+const scrollToElement = (elementId: string, offset = 0): void => {
+  const element = document.getElementById(elementId);
+  if (element) {
+    const elementPosition = element.offsetTop - offset;
+    window.scrollTo({
+      top: elementPosition,
+      behavior: 'smooth'
+    });
+  }
+};
+
+/**
+ * Handles scroll behavior for the page
+ * @param hash - The URL hash (if any)
+ * @param pathname - The current pathname
+ */
+const setupScrollBehavior = (hash: string, pathname: string): (() => void) => {
+  // Disable browser's scroll restoration
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+
+  // Add loading class to prevent flash of unstyled content
+  document.documentElement.classList.add('loading');
+  
+  // Handle hash-based navigation
+  if (hash) {
+    const timer = setTimeout(() => {
+      document.documentElement.classList.remove('loading');
+      scrollToElement(hash.substring(1), NAVBAR_HEIGHT);
+    }, HASH_SCROLL_DELAY);
     
-    // Disable browser's scroll restoration
-    if ('scrollRestoration' in history) {
-      history.scrollRestoration = 'manual';
-    }
-
-    // Force immediate scroll to top
-    window.scrollTo(0, 0);
-
-    // If there's a hash in the URL, handle it properly
-    if (location.hash) {
-      // Wait for the page to render, then scroll to the hash
-      const timer = setTimeout(() => {
-        document.documentElement.classList.remove('loading');
-        const element = document.getElementById(location.hash.substring(1));
-        if (element) {
-          const navbarHeight = 80;
-          const elementPosition = element.offsetTop - navbarHeight;
-          window.scrollTo({
-            top: elementPosition,
-            behavior: 'smooth'
-          });
-        }
-      }, 300);
-      return () => {
-        clearTimeout(timer);
-        document.documentElement.classList.remove('loading');
-      };
-    } else {
-      // No hash, ensure we start at the top
-      const timer = setTimeout(() => {
-        document.documentElement.classList.remove('loading');
-      }, 500);
-      
-      return () => {
-        clearTimeout(timer);
-        document.documentElement.classList.remove('loading');
-      };
-    }
-  }, [location.hash, location.pathname]);
-
-  // Additional effect to prevent any unwanted scrolling during component mounting
-  useEffect(() => {
-    const preventScroll = () => {
-      if (window.scrollY > 0 && !location.hash) {
-        window.scrollTo(0, 0);
-      }
-    };
-
-    // Immediate scroll to top
-    preventScroll();
-
-    // Check scroll position multiple times during initial load
-    const intervals = [10, 50, 100, 200, 500].map(delay => 
-      setTimeout(preventScroll, delay)
-    );
-
     return () => {
-      intervals.forEach(clearTimeout);
+      clearTimeout(timer);
+      document.documentElement.classList.remove('loading');
     };
-  }, [location.hash]);
+  }
+  
+  // Handle regular page load/refresh
+  window.scrollTo(0, 0);
+  
+  // Remove loading class after a short delay
+  const timer = setTimeout(() => {
+    document.documentElement.classList.remove('loading');
+  }, SCROLL_DELAY);
+  
+  return () => {
+    clearTimeout(timer);
+    document.documentElement.classList.remove('loading');
+  };
+};
 
-  // Handle navigation from other pages
-  useEffect(() => {
-    if (location.pathname === '/' && !location.hash) {
-      window.scrollTo(0, 0);
-    }
-  }, [location.pathname, location.hash]);
+const LandingPage = () => {
+  const { hash, pathname } = useLocation();
 
-  // Ensure scroll to top on page load/refresh
+  // Handle all scroll-related behavior in a single effect
   useEffect(() => {
+    const cleanup = setupScrollBehavior(hash, pathname);
+    
+    // Handle page load/refresh
     const handleLoad = () => {
-      if (!location.hash) {
+      if (!hash) {
         window.scrollTo(0, 0);
       }
     };
@@ -106,9 +98,14 @@ const LandingPage = () => {
       handleLoad();
     } else {
       window.addEventListener('load', handleLoad);
-      return () => window.removeEventListener('load', handleLoad);
     }
-  }, [location.hash]);
+
+    // Cleanup function
+    return () => {
+      cleanup?.();
+      window.removeEventListener('load', handleLoad);
+    };
+  }, [hash, pathname]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">

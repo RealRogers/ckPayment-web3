@@ -231,11 +231,14 @@ const PricingSection = () => {
                     <p className="text-sm text-muted-foreground mb-6">{plan.description}</p>
                     
                     <Button 
+                      asChild
                       className={`w-full ${plan.popular ? 'bg-gradient-to-r from-primary to-accent hover:opacity-90' : ''}`}
                       size="lg"
                     >
-                      {plan.cta}
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                      <a href="/register" target="_blank" rel="noopener noreferrer">
+                        {plan.cta}
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </a>
                     </Button>
                   </div>
                   
