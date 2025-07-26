@@ -32,13 +32,14 @@ import {
   Settings,
   Github
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect } from "react";
 import AnimatedBackground from "@/components/AnimatedBackground";
 
 const Gaming = () => {
+  const navigate = useNavigate();
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const { toast } = useToast();
@@ -323,7 +324,11 @@ await ckGaming.rewardPlayer('player123', {
               Seamlessly integrate blockchain payments, NFTs, and play-to-earn mechanics into your games with our developer-friendly SDK.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button size="lg" className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white">
+              <Button 
+                size="lg" 
+                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+                onClick={() => navigate('/get-started')}
+              >
                 Get Started for Free
                 <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
@@ -617,7 +622,11 @@ await ckGaming.rewardPlayer('player123', {
               </p>
               
               <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
-                <Button size="lg" className="px-8 py-6 text-lg font-medium group bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
+                <Button 
+                  size="lg" 
+                  className="px-8 py-6 text-lg font-medium group bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                  onClick={() => navigate('/get-started')}
+                >
                   <Gamepad2 className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
                   Start Building
                 </Button>

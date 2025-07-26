@@ -34,12 +34,13 @@ import {
   HelpCircle,
   Mail
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import React from "react";
 import AnimatedBackground from "@/components/AnimatedBackground";
 
 const Features = () => {
+  const navigate = useNavigate();
   const [activeFeature, setActiveFeature] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
@@ -322,7 +323,13 @@ const Features = () => {
                 </button>
 
                 <div className="pt-4 border-t border-border/30">
-                  <Button className="w-full" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button 
+                    className="w-full" 
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      navigate('/get-started');
+                    }}
+                  >
                     <Rocket className="h-4 w-4 mr-2" />
                     Get Started
                   </Button>
@@ -709,7 +716,11 @@ const Features = () => {
               </p>
               
               <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4 mb-6 sm:mb-8 px-4 sm:px-0">
-                <Button size="lg" className="w-full sm:w-auto px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg font-medium group">
+                <Button 
+                  size="lg" 
+                  className="w-full sm:w-auto px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg font-medium group"
+                  onClick={() => navigate('/get-started')}
+                >
                   <Rocket className="h-4 sm:h-5 w-4 sm:w-5 mr-2 group-hover:scale-110 transition-transform" />
                   Start Building Now
                 </Button>

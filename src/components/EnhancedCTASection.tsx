@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Github, ExternalLink, Send, ArrowRight, Zap, BookOpen } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import ParticleNetwork from './ui/ParticleNetwork';
 
@@ -28,6 +29,7 @@ const itemVariants = {
 };
 
 export default function EnhancedCTASection() {
+  const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -172,6 +174,7 @@ export default function EnhancedCTASection() {
         <Button 
           size="lg" 
           className="group relative overflow-hidden px-8 py-6 text-lg font-semibold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+          onClick={() => navigate('/get-started')}
         >
           <span className="relative z-10 flex items-center">
             Get Started for Free
@@ -298,13 +301,11 @@ export default function EnhancedCTASection() {
             <p className="text-sm text-green-200">Join the decentralized payment revolution</p>
           </div>
           <Button 
-            asChild 
             size="sm"
             className="bg-lime-400 hover:bg-lime-500 text-gray-900 font-bold"
+            onClick={() => navigate('/get-started')}
           >
-            <a href="https://github.com/your-org/ckpayment" target="_blank" rel="noopener noreferrer">
-              Get Started
-            </a>
+            Get Started
           </Button>
         </div>
       </div>

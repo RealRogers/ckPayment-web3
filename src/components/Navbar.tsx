@@ -25,31 +25,42 @@ const Navbar = () => {
 
     setIsMenuOpen(false);
 
-    // If we're not on the home page and trying to navigate to a section, go to home first
-    if (location.pathname !== '/' && ['hero', 'features', 'how-it-works', 'use-cases', 'security', 'pricing', 'faq', 'get-started'].includes(id)) {
+    // If we're not on the home page, navigate to home with hash
+    if (location.pathname !== '/') {
       window.location.href = `/#${id}`;
       return;
     }
 
     // For internal sections, scroll with offset to compensate for fixed navbar
-    const element = document.getElementById(id);
-    if (element) {
+    const scrollToElement = (elementId: string) => {
+      const element = document.getElementById(elementId);
+      if (!element) return false;
+      
       const navbarHeight = 80; // Height of fixed navbar
-      const elementPosition = element.offsetTop - navbarHeight;
-
+      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
+      
       window.scrollTo({
         top: elementPosition,
         behavior: 'smooth'
       });
-    } else {
-      console.warn(`Element with id "${id}" not found`);
-      // If element not found, try to navigate to home with hash
-      if (location.pathname === '/') {
-        window.location.hash = id;
-      } else {
-        window.location.href = `/#${id}`;
+      
+      // Update URL hash without jumping
+      window.history.pushState(null, '', `#${elementId}`);
+      return true;
+    };
+
+    // Try to scroll immediately
+    if (scrollToElement(id)) return;
+
+    // If element not found, try again after a short delay
+    const maxRetries = 3;
+    let retryCount = 0;
+    
+    const retryScroll = setInterval(() => {
+      if (scrollToElement(id) || ++retryCount >= maxRetries) {
+        clearInterval(retryScroll);
       }
-    }
+    }, 100);
   };
 
   // Close menu when clicking outside

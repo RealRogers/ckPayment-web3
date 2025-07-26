@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Features from "./pages/Features";
 import HowItWorks from "./pages/HowItWorks";
 import StartBuilding from "./pages/StartBuilding";
+import GetStarted from "./pages/GetStarted";
 import ECommerce from "./pages/ECommerce";
 import Gaming from "./pages/Gaming";
 import DeFi from "./pages/DeFi";
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/features" element={<Features />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/start-building" element={<StartBuilding />} />
+          <Route path="/get-started" element={<GetStarted />} />
           <Route path="/ecommerce" element={<ECommerce />} />
           <Route path="/gaming" element={<Gaming />} />
           <Route path="/defi" element={<DeFi />} />

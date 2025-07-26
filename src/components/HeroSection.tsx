@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Copy, ExternalLink, Zap, Code, ArrowRight } from "lucide-react";
+import { Copy, Zap, Code, ArrowRight } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import dynamic from 'next/dynamic';
 import AnimatedBackground from "./AnimatedBackground";
 import DemoEmbed from "./DemoEmbed";
 
@@ -17,16 +17,6 @@ const MotionDiv = ({ children, className = '', initial, animate, variants, ...pr
 };
 
 // Animation variants
-const container = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-};
-
 const item = {
   hidden: { opacity: 0, y: 20 },
   show: { opacity: 1, y: 0 }
@@ -40,6 +30,7 @@ const motion = {
 
 const HeroSection = () => {
   const [copied, setCopied] = useState(false);
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   const codeExample = `<!-- Add ckPayment to your dApp -->\n<script src="https://zkg6o-xiaaa-aaaag-acofa-cai.icp0.io/ckpay.js"></script>`;
@@ -58,7 +49,7 @@ const HeroSection = () => {
     <section id="hero" className="relative min-h-screen bg-gradient-to-b from-background to-background/95">
       {/* Animated Background */}
       <AnimatedBackground />
-      
+
       {/* Glow effects */}
       <div className="absolute top-1/4 -left-1/4 w-[800px] h-[800px] rounded-full bg-primary/10 blur-3xl -z-10" />
       <div className="absolute bottom-1/4 -right-1/4 w-[1000px] h-[1000px] rounded-full bg-accent/10 blur-3xl -z-10" />
@@ -92,7 +83,7 @@ const HeroSection = () => {
 
             {/* Subtitle */}
             <p className="text-lg text-muted-foreground mb-8 max-w-lg leading-relaxed">
-              Integrate Web3 payments into your ICP dApp with a single line of JavaScript. 
+              Integrate Web3 payments into your ICP dApp with a single line of JavaScript.
               No servers. No intermediaries. Just pure blockchain magic.
             </p>
 
@@ -121,23 +112,24 @@ const HeroSection = () => {
             {/* CTA Buttons */}
             <div className="flex flex-wrap gap-4">
               <motion.div variants={item}>
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   variant="gradient"
                   className="px-8 py-6 text-base font-medium animate-fade-in-up"
                   style={{
                     animationDelay: '0.3s',
                     animationFillMode: 'both'
                   }}
+                  onClick={() => navigate('/get-started')}
                 >
                   <span className="relative z-10">Get Started</span>
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform relative z-10" />
                 </Button>
               </motion.div>
               <motion.div variants={item}>
-                <Button 
-                  variant="outline" 
-                  size="lg" 
+                <Button
+                  variant="outline"
+                  size="lg"
                   className="group border-border/30 bg-background/50 hover:bg-background px-6 py-6 text-base font-medium"
                 >
                   <Code className="mr-2 h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
@@ -170,7 +162,7 @@ const HeroSection = () => {
           <div className="relative hidden lg:block">
             <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl -z-10" />
             <DemoEmbed />
-            
+
             {/* Floating elements */}
             <div className="absolute -bottom-16 -left-16 w-32 h-32 rounded-full bg-accent/20 backdrop-blur-sm border border-accent/20 flex items-center justify-center animate-float">
               <div className="text-center">
@@ -183,7 +175,7 @@ const HeroSection = () => {
       </div>
 
       {/* Scroll indicator */}
-      <div 
+      <div
         className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center"
         style={{
           animation: 'fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1s forwards',

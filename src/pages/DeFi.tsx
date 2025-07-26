@@ -42,13 +42,14 @@ import {
   Banknote,
   Percent
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import React from "react";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import { useToast } from "@/hooks/use-toast";
 
 const DeFi = () => {
+  const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
   const [activeFeature, setActiveFeature] = useState(0);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
@@ -336,7 +337,11 @@ const strategy = await ckDeFi.deployStrategy({
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button size="lg" className="px-8 py-6 text-lg font-medium group bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600">
+              <Button 
+                size="lg" 
+                className="px-8 py-6 text-lg font-medium group bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+                onClick={() => navigate('/get-started')}
+              >
                 <Play className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
                 Start Building
               </Button>
@@ -591,7 +596,11 @@ const strategy = await ckDeFi.deployStrategy({
               </p>
               
               <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
-                <Button size="lg" className="px-8 py-6 text-lg font-medium group bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600">
+                <Button 
+                  size="lg" 
+                  className="px-8 py-6 text-lg font-medium group bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+                  onClick={() => navigate('/get-started')}
+                >
                   <TrendingUp className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
                   Start Building DeFi
                 </Button>
