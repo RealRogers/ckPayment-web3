@@ -1,5 +1,6 @@
-import { Blocks, Rocket, Shield, Zap, Globe, Code2, CheckCircle, ArrowRight, ExternalLink } from "lucide-react";
+import { Blocks, Rocket, Shield, Zap, Globe, Code2, CheckCircle, ArrowRight, ExternalLink, ShoppingCart } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 
 const SolutionSection = () => {
@@ -8,19 +9,29 @@ const SolutionSection = () => {
       icon: Blocks,
       title: "100% On-Chain",
       description: "Both backend and frontend (our JS SDK) are hosted and served directly from ICP canisters. True decentralization.",
-      highlight: "Zero Dependencies"
+      highlight: "Zero Dependencies",
+      badge: null
     },
     {
       icon: Rocket,
       title: "Instant Integration",
       description: "Inspired by Stripe, you only need to add a <script> tag to get started. No complex configurations needed.",
-      highlight: "One-Line Setup"
+      highlight: "One-Line Setup",
+      badge: null
     },
     {
       icon: Shield,
       title: "ICP Security",
       description: "Inherits all the security, speed, and censorship resistance of the Internet Computer Protocol network.",
-      highlight: "Enterprise Grade"
+      highlight: "Enterprise Grade",
+      badge: null
+    },
+    {
+      icon: ShoppingCart,
+      title: "ICP Solution: Hosted Checkout On-Chain",
+      description: "Completely decentralized checkout without external redirects. The entire payment flow runs on-chain with no censorship risks or failure points.",
+      highlight: "Trustless Payments",
+      badge: { text: "On-Chain Secure", variant: "default" as const }
     }
   ];
 
@@ -70,11 +81,12 @@ const SolutionSection = () => {
           </div>
 
           {/* Main Features Grid */}
-          <div className="grid lg:grid-cols-3 gap-8 mb-16">
+          <div className="grid lg:grid-cols-2 xl:grid-cols-4 gap-8 mb-16">
             {mainFeatures.map((feature, index) => {
               const IconComponent = feature.icon;
+              const isSpecialCard = feature.badge !== null;
               return (
-                <Card key={index} className="relative bg-card/50 backdrop-blur-sm border border-border/50 p-8 text-center group hover:scale-105 hover:shadow-2xl transition-all duration-500">
+                <Card key={index} className={`relative bg-card/50 backdrop-blur-sm border border-border/50 p-8 text-center group hover:scale-105 hover:shadow-2xl transition-all duration-500 ${isSpecialCard ? 'border-green-500/30 bg-green-50/5' : ''}`}>
                   {/* Highlight Badge */}
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                     <span className="bg-gradient-to-r from-primary to-accent text-white px-3 py-1 rounded-full text-xs font-semibold">
@@ -82,13 +94,22 @@ const SolutionSection = () => {
                     </span>
                   </div>
                   
+                  {/* Special Badge for ICP Solution */}
+                  {feature.badge && (
+                    <div className="absolute -top-6 right-4">
+                      <Badge variant={feature.badge.variant} className="text-xs font-semibold bg-green-600 hover:bg-green-700">
+                        {feature.badge.text}
+                      </Badge>
+                    </div>
+                  )}
+                  
                   {/* Icon */}
-                  <div className="w-20 h-20 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:from-primary/30 group-hover:to-accent/30 transition-all duration-300">
-                    <IconComponent className="h-10 w-10 text-primary group-hover:scale-110 transition-transform duration-300" />
+                  <div className={`w-20 h-20 bg-gradient-to-br ${isSpecialCard ? 'from-green-500/20 to-emerald-500/20' : 'from-primary/20 to-accent/20'} rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:from-primary/30 group-hover:to-accent/30 transition-all duration-300`}>
+                    <IconComponent className={`h-10 w-10 ${isSpecialCard ? 'text-green-600' : 'text-primary'} group-hover:scale-110 transition-transform duration-300`} />
                   </div>
                   
                   {/* Content */}
-                  <h3 className="text-2xl font-bold text-foreground mb-4 group-hover:text-primary transition-colors duration-300">
+                  <h3 className={`text-2xl font-bold mb-4 transition-colors duration-300 ${isSpecialCard ? 'text-green-600 group-hover:text-green-500' : 'text-foreground group-hover:text-primary'}`}>
                     {feature.title}
                   </h3>
                   <p className="text-muted-foreground leading-relaxed text-base">
@@ -97,7 +118,7 @@ const SolutionSection = () => {
                   
                   {/* Hover Arrow */}
                   <div className="mt-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <ArrowRight className="h-5 w-5 text-primary mx-auto" />
+                    <ArrowRight className={`h-5 w-5 mx-auto ${isSpecialCard ? 'text-green-600' : 'text-primary'}`} />
                   </div>
                 </Card>
               );

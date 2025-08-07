@@ -1,5 +1,6 @@
-import { Server, AlertTriangle, ShieldAlert } from "lucide-react";
+import { Server, AlertTriangle, ShieldAlert, ExternalLink } from "lucide-react";
 import { Card } from "./ui/card";
+import { Badge } from "./ui/badge";
 
 const ProblemCards = () => {
   const cards = [
@@ -7,19 +8,29 @@ const ProblemCards = () => {
       icon: <Server className="h-8 w-8 text-amber-500" />,
       title: "The Hidden Dependency",
       description: "Your Web3 app is secretly chained to a Web2 server. This centralized component undermines your entire decentralized stack.",
-      borderColor: "border-amber-500/30"
+      borderColor: "border-amber-500/30",
+      badge: null
     },
     {
       icon: <AlertTriangle className="h-8 w-8 text-red-500" />,
       title: "Single Point of Failure",
       description: "One server outage, one DDoS attack, or one de-platforming decision, and your entire payment system is offline. Your revenue stops instantly.",
-      borderColor: "border-red-500/30"
+      borderColor: "border-red-500/30",
+      badge: null
     },
     {
       icon: <ShieldAlert className="h-8 w-8 text-purple-500" />,
       title: "A Compromised Paradigm",
       description: "It's the illusion of decentralization. Your smart contract is on-chain, but your user interface is censorable and fragile, defeating the core promise of Web3.",
-      borderColor: "border-purple-500/30"
+      borderColor: "border-purple-500/30",
+      badge: null
+    },
+    {
+      icon: <ExternalLink className="h-8 w-8 text-orange-500" />,
+      title: "Stripe Problem: Centralized Redirects",
+      description: "Stripe Checkout redirects users to external servers, creating centralized failure points and third-party dependencies that compromise the Web3 experience.",
+      borderColor: "border-orange-500/30",
+      badge: { text: "Stripe Issue", variant: "destructive" as const }
     }
   ];
 
@@ -35,16 +46,25 @@ const ProblemCards = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {cards.map((card, index) => (
-            <Card 
+            <Card
               key={index}
-              className={`p-6 bg-background/80 backdrop-blur-sm border ${card.borderColor} hover:shadow-lg transition-all duration-300 h-full flex flex-col relative z-10`}
+              className={`p-6 bg-background/80 backdrop-blur-sm border ${card.borderColor} hover:shadow-lg transition-all duration-300 h-full flex flex-col relative z-10 group`}
             >
-              <div className="w-16 h-16 rounded-xl bg-opacity-20 flex items-center justify-center mb-4 mx-auto" style={{ backgroundColor: `${card.borderColor.replace('border-', '').replace('/30', '')}20` }}>
+              {/* Badge for special cards */}
+              {card.badge && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <Badge variant={card.badge.variant} className="text-xs font-semibold">
+                    {card.badge.text}
+                  </Badge>
+                </div>
+              )}
+
+              <div className="w-16 h-16 rounded-xl bg-opacity-20 flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300" style={{ backgroundColor: `${card.borderColor.replace('border-', '').replace('/30', '')}20` }}>
                 {card.icon}
               </div>
-              <h3 className="text-xl font-bold text-foreground mb-3 text-center">
+              <h3 className="text-xl font-bold text-foreground mb-3 text-center group-hover:text-orange-500 transition-colors duration-300">
                 {card.title}
               </h3>
               <p className="text-muted-foreground text-center flex-grow">
