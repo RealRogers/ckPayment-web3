@@ -1,13 +1,46 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
-import { Menu, X, ExternalLink } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Menu, X, ExternalLink, Wallet, Shield, CheckCircle } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { buttonHoverAnimation, buttonContent } from "@/lib/animations";
+
+// For production implementation, install Internet Identity client:
+// npm install @dfinity/auth-client @dfinity/agent @dfinity/identity
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
+  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+  const isMobile = useIsMobile();
+
+  // Handle Internet Identity connection
+  const handleIIConnect = async () => {
+    setIsWalletModalOpen(true);
+    setIsConnecting(true);
+    setIsConnected(false);
+
+    try {
+      // Simulate Internet Identity authentication
+      // In a real implementation, you would use @dfinity/auth-client
+      // const authClient = await AuthClient.create();
+      // await authClient.login({ ... });
+
+      // Simulate authentication delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      setIsConnected(true);
+      setIsConnecting(false);
+    } catch (error) {
+      console.error('Authentication failed:', error);
+      setIsConnecting(false);
+    }
+  };
 
   const scrollToSection = (id: string) => {
     // Handle special navigation cases
@@ -35,15 +68,15 @@ const Navbar = () => {
     const scrollToElement = (elementId: string) => {
       const element = document.getElementById(elementId);
       if (!element) return false;
-      
+
       const navbarHeight = 80; // Height of fixed navbar
-      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
-      
+      const elementPosition = element.getBoundingClientRect().top + window.scrollY - navbarHeight;
+
       window.scrollTo({
         top: elementPosition,
         behavior: 'smooth'
       });
-      
+
       // Update URL hash without jumping
       window.history.pushState(null, '', `#${elementId}`);
       return true;
@@ -55,7 +88,7 @@ const Navbar = () => {
     // If element not found, try again after a short delay
     const maxRetries = 3;
     let retryCount = 0;
-    
+
     const retryScroll = setInterval(() => {
       if (scrollToElement(id) || ++retryCount >= maxRetries) {
         clearInterval(retryScroll);
@@ -134,22 +167,32 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-lg border-b border-border" role="navigation" aria-label="Main navigation">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      <nav className="fixed top-0 w-full z-50 bg-background/90 backdrop-blur-xl border-b border-border/50 shadow-sm" role="navigation" aria-label="Main navigation">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <img
-              src="/lovable-uploads/42dcfff0-6a9c-4d69-908b-9729c5f9000b.png"
-              alt="ckPayment Logo"
-              className="h-8 w-auto hover:opacity-80 transition-opacity"
-            />
+          <Link to="/" className="flex items-center space-x-3 group">
+            <div className="relative">
+              <img
+                src="/lovable-uploads/42dcfff0-6a9c-4d69-908b-9729c5f9000b.png"
+                alt="ckPayment Logo"
+                className="h-12 w-auto hover:opacity-80 transition-all duration-300 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 blur-sm"></div>
+            </div>
+            <div className="hidden sm:block">
+              <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                ckPayment
+              </span>
+              <div className="text-xs text-muted-foreground -mt-1">
+                Web3 Payments
+              </div>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => {
               const isActive = location.pathname === '/' && activeSection === item.id;
-              const isFeaturePage = location.pathname === '/features' && item.id === 'features';
 
               if (item.hasPage) {
                 const isCurrentPage = (item.id === 'features' && location.pathname === '/features') ||
@@ -183,7 +226,22 @@ const Navbar = () => {
             })}
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
+            {/* Test Wallet Button - Hidden on mobile */}
+            {!isMobile && (
+              <Button
+                variant="outline"
+                className={`${buttonHoverAnimation} border-primary/30 hover:border-primary/50 text-primary hover:text-white px-4 py-2`}
+                onClick={handleIIConnect}
+                aria-label="Test wallet connection with Internet Identity"
+              >
+                <div className={buttonContent}>
+                  <Wallet className="mr-2 h-4 w-4" />
+                  Test Wallet
+                </div>
+              </Button>
+            )}
+
             {/* Mobile Menu Button */}
             <button
               className="md:hidden p-2 rounded-md text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -196,7 +254,7 @@ const Navbar = () => {
 
             {/* CTA Button - Hidden on mobile when menu is open */}
             <Button
-              className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-glow-soft hover:shadow-glow-primary transition-all duration-300 hidden md:inline-flex"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-glow-soft hover:shadow-glow-primary transition-all duration-300 hidden md:inline-flex px-6 py-2"
               onClick={() => scrollToSection('get-started')}
               aria-label="Get started with ckPayment"
             >
@@ -215,7 +273,6 @@ const Navbar = () => {
           <div className="flex flex-col space-y-4">
             {navItems.map((item) => {
               const isActive = location.pathname === '/' && activeSection === item.id;
-              const isFeaturePage = location.pathname === '/features' && item.id === 'features';
 
               if (item.hasPage) {
                 const isCurrentPage = (item.id === 'features' && location.pathname === '/features') ||
@@ -255,8 +312,19 @@ const Navbar = () => {
                 </button>
               );
             })}
+            {/* Test Wallet Button for Mobile */}
             <Button
-              className="mt-4 w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-glow-soft hover:shadow-glow-primary transition-all duration-300"
+              variant="outline"
+              className="mt-4 w-full border-primary/30 hover:border-primary/50 text-primary hover:bg-primary hover:text-white transition-all duration-300"
+              onClick={handleIIConnect}
+              aria-label="Test wallet connection with Internet Identity"
+            >
+              <Wallet className="mr-2 h-4 w-4" />
+              Test Wallet
+            </Button>
+
+            <Button
+              className="mt-2 w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-glow-soft hover:shadow-glow-primary transition-all duration-300"
               onClick={() => scrollToSection('get-started')}
               aria-label="Get started with ckPayment"
             >
@@ -265,6 +333,80 @@ const Navbar = () => {
           </div>
         </div>
       )}
+
+      {/* Wallet Connection Modal */}
+      <Dialog open={isWalletModalOpen} onOpenChange={setIsWalletModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Wallet className="h-5 w-5 text-primary" />
+              <span>Demo Wallet Connection</span>
+            </DialogTitle>
+            <DialogDescription>
+              Testing secure Web3 payments with Internet Identity
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {isConnecting && (
+              <div className="flex flex-col items-center space-y-4 py-6">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <p className="text-sm text-muted-foreground">Connecting to Internet Identity...</p>
+                <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                  <Shield className="h-4 w-4" />
+                  <span>Secure authentication in progress</span>
+                </div>
+              </div>
+            )}
+
+            {isConnected && (
+              <div className="flex flex-col items-center space-y-4 py-6">
+                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/20">
+                  <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+                </div>
+                <div className="text-center space-y-2">
+                  <h3 className="font-semibold text-green-600 dark:text-green-400">
+                    Wallet Connected Successfully!
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Ready for secure on-chain payments
+                  </p>
+                </div>
+
+                {/* Security Features */}
+                <div className="w-full space-y-3 mt-4">
+                  <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/50">
+                    <Shield className="h-4 w-4 text-primary" />
+                    <div className="text-sm">
+                      <div className="font-medium">Double Confirmation</div>
+                      <div className="text-muted-foreground text-xs">
+                        High-value transactions require 2FA via Internet Identity
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-3 p-3 rounded-lg bg-muted/50">
+                    <CheckCircle className="h-4 w-4 text-primary" />
+                    <div className="text-sm">
+                      <div className="font-medium">Pre-signature Validation</div>
+                      <div className="text-muted-foreground text-xs">
+                        Transaction details verified before signing
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <Button
+                  className="w-full mt-4"
+                  onClick={() => setIsWalletModalOpen(false)}
+                >
+                  Continue to Demo
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
