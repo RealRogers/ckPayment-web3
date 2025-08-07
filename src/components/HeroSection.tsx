@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Copy, Zap, Code, ArrowRight } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Copy, Zap, Code, ArrowRight, Play, CreditCard } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -30,10 +31,19 @@ const motion = {
 
 const HeroSection = () => {
   const [copied, setCopied] = useState(false);
+  const [isQuickDemoOpen, setIsQuickDemoOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const codeExample = `<!-- Add ckPayment to your dApp -->\n<script src="https://zkg6o-xiaaa-aaaag-acofa-cai.icp0.io/ckpay.js"></script>`;
+  
+  const cryptoLinkExample = `<script>
+ckPaymentSDK.initCryptoLink({
+  amount: 10,
+  currency: 'ICP',
+  recurring: true
+});
+</script>`;
 
   const copyCode = () => {
     navigator.clipboard.writeText(codeExample);
@@ -43,6 +53,14 @@ const HeroSection = () => {
       description: "The code has been copied to clipboard",
     });
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const copyCryptoLinkCode = () => {
+    navigator.clipboard.writeText(cryptoLinkExample);
+    toast({
+      title: "Crypto Link code copied",
+      description: "Integration code copied to clipboard",
+    });
   };
 
   return (
@@ -130,6 +148,17 @@ const HeroSection = () => {
                 <Button
                   variant="outline"
                   size="lg"
+                  className="group border-primary/30 bg-background/50 hover:bg-primary hover:text-white px-6 py-6 text-base font-medium transition-all duration-300"
+                  onClick={() => setIsQuickDemoOpen(true)}
+                >
+                  <Play className="mr-2 h-5 w-5 text-primary group-hover:text-white transition-colors" />
+                  <span>Quick Demo</span>
+                </Button>
+              </motion.div>
+              <motion.div variants={item}>
+                <Button
+                  variant="outline"
+                  size="lg"
                   className="group border-border/30 bg-background/50 hover:bg-background px-6 py-6 text-base font-medium"
                 >
                   <Code className="mr-2 h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
@@ -161,13 +190,13 @@ const HeroSection = () => {
           {/* Right side - Demo */}
           <div className="relative hidden lg:block">
             <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl -z-10" />
-            <DemoEmbed />
+            <DemoEmbed type="crypto-link" />
 
             {/* Floating elements */}
             <div className="absolute -bottom-16 -left-16 w-32 h-32 rounded-full bg-accent/20 backdrop-blur-sm border border-accent/20 flex items-center justify-center animate-float">
               <div className="text-center">
-                <div className="text-2xl font-bold text-accent">100%</div>
-                <div className="text-xs text-muted-foreground">Uptime</div>
+                <div className="text-2xl font-bold text-accent">+7%</div>
+                <div className="text-xs text-muted-foreground">Conversion</div>
               </div>
             </div>
           </div>
@@ -185,6 +214,73 @@ const HeroSection = () => {
         <div className="text-xs text-muted-foreground mb-2">Scroll to explore</div>
         <div className="w-px h-12 bg-gradient-to-b from-foreground/30 to-transparent" />
       </div>
+
+      {/* Quick Demo Modal */}
+      <Dialog open={isQuickDemoOpen} onOpenChange={setIsQuickDemoOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <CreditCard className="h-5 w-5 text-primary" />
+              <span>Crypto Link - 1-Click Payment Demo</span>
+            </DialogTitle>
+            <DialogDescription>
+              Experience seamless recurring payments with +7% conversion boost
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Demo Preview */}
+            <div className="bg-muted/30 rounded-lg p-6 border border-border/30">
+              <DemoEmbed type="crypto-link" />
+            </div>
+
+            {/* Integration Code */}
+            <div className="space-y-3">
+              <h4 className="font-semibold text-sm">Integration Code:</h4>
+              <Card className="bg-background/50 backdrop-blur-sm border border-border/30 p-4">
+                <div className="flex items-start justify-between">
+                  <pre className="text-sm text-muted-foreground font-mono flex-1 overflow-x-auto">
+                    <code>{cryptoLinkExample}</code>
+                  </pre>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={copyCryptoLinkCode}
+                    className="ml-2 shrink-0"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </Card>
+            </div>
+
+            {/* Benefits */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center p-4 rounded-lg bg-muted/20">
+                <div className="text-2xl font-bold text-primary mb-1">+7%</div>
+                <div className="text-xs text-muted-foreground">Conversion Rate</div>
+              </div>
+              <div className="text-center p-4 rounded-lg bg-muted/20">
+                <div className="text-2xl font-bold text-primary mb-1">1-Click</div>
+                <div className="text-xs text-muted-foreground">Payment Flow</div>
+              </div>
+              <div className="text-center p-4 rounded-lg bg-muted/20">
+                <div className="text-2xl font-bold text-primary mb-1">0%</div>
+                <div className="text-xs text-muted-foreground">Transaction Fees</div>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3">
+              <Button variant="outline" onClick={() => setIsQuickDemoOpen(false)}>
+                Close
+              </Button>
+              <Button onClick={() => navigate('/get-started')}>
+                Start Integration
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };
