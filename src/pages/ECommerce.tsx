@@ -34,20 +34,352 @@ import {
   Settings
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import React from "react";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import { useToast } from "@/hooks/use-toast";
+import "../styles/slider.css";
 
 const ECommerce = () => {
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
   const [activeFeature, setActiveFeature] = useState(0);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const smoothyInstanceRef = useRef<any>(null);
+  const animationFrameRef = useRef<number>();
   const { toast } = useToast();
 
   useEffect(() => {
     setIsVisible(true);
+  }, []);
+
+  // Smooothy Slider Initialization
+  useEffect(() => {
+    // Función para inicializar Smooothy
+    const initializeSlider = () => {
+      const sliderElement = document.getElementById('product-slider');
+      const shoppingBagImage = document.getElementById('shopping-bag-3d');
+      
+      if (!sliderElement || !shoppingBagImage) return;
+
+      // Configuración de Smooothy según especificaciones
+      const smoothyConfig = {
+        // Bucle infinito activado
+        infinite: true,
+        
+        // Snapping a slides activado
+        snap: true,
+        
+        // Sensibilidad al drag muy baja para control preciso
+        dragSensitivity: 0.005,
+        
+        // Factor de suavidad para animaciones fluidas
+        lerpFactor: 0.3,
+        
+        // Decaimiento de velocidad para desaceleración natural
+        speedDecay: 0.85,
+        
+        // Callbacks para efectos personalizados
+        onSlideChange: (slideIndex: number) => {
+          console.log(`📍 Cambio a slide: ${slideIndex}`);
+          setCurrentSlide(slideIndex);
+          updateSliderIndicators(slideIndex);
+        },
+        
+        onUpdate: (progress: number, velocity: number) => {
+          // Efecto parallax en la imagen 3D
+          handleParallaxUpdate(progress, velocity, shoppingBagImage);
+        },
+        
+        onResize: () => {
+          console.log('📐 Redimensionando slider...');
+        }
+      };
+
+      try {
+        // Inicializar Smooothy (asumiendo que está disponible globalmente)
+        if (typeof window !== 'undefined' && (window as any).Smooothy) {
+          smoothyInstanceRef.current = new (window as any).Smooothy(sliderElement, smoothyConfig);
+          console.log('🚀 Smooothy inicializado correctamente');
+        } else {
+          console.warn('⚠️ Smooothy no está disponible, usando navegación manual');
+          setupManualNavigation();
+        }
+      } catch (error) {
+        console.error('❌ Error al inicializar Smooothy:', error);
+        setupManualNavigation();
+      }
+    };
+
+    // Función para manejar efectos parallax - ¡INTERACCIÓN DRAMÁTICA!
+    const handleParallaxUpdate = (progress: number, velocity: number, imageElement: HTMLElement) => {
+      if (currentSlide === 0 && imageElement) {
+        const time = Date.now() * 0.001;
+        
+        // 🚀 Parallax más dramático con interacción
+        const parallaxOffset = progress * 30; // Doble de intensidad
+        const rotationY = velocity * 8; // Rotación más pronunciada
+        const scale = 1.1 + Math.abs(velocity) * 0.08; // Zoom más dramático
+        
+        // 🌪️ Rotación adicional basada en velocidad
+        const velocityRotation = velocity * 15;
+        
+        // 🎭 Combinar animación automática con interacción del usuario
+        const floatY = Math.sin(time * 0.8) * 10; // Reducido durante interacción
+        const floatX = Math.cos(time * 0.6) * 5;  // Reducido durante interacción
+        const autoRotation = (time * 20) % 360;   // Rotación más lenta durante interacción
+        
+        // ✨ Aplicar transformaciones combinadas (automáticas + interactivas)
+        imageElement.style.transform = `
+          perspective(1000px) 
+          translateX(${parallaxOffset + floatX}px) 
+          translateY(${floatY}px)
+          rotateZ(${autoRotation + velocityRotation}deg)
+          rotateY(${-5 + rotationY + Math.sin(time * 0.7) * 10}deg)
+          scale(${scale})
+        `;
+        
+        // 🎨 Sombra que reacciona a la interacción
+        const shadowIntensity = 0.4 + Math.abs(velocity) * 0.3;
+        const shadowBlur = 40 + Math.abs(velocity) * 20;
+        imageElement.style.filter = `
+          drop-shadow(${parallaxOffset * 0.3}px ${25 + Math.abs(velocity) * 10}px ${shadowBlur}px rgba(59, 130, 246, ${shadowIntensity}))
+          brightness(${1 + Math.abs(velocity) * 0.2})
+        `;
+      }
+    };
+
+    // Función para actualizar indicadores
+    const updateSliderIndicators = (slideIndex: number) => {
+      for (let i = 0; i < 3; i++) {
+        const indicator = document.getElementById(`slider-indicator-${i}`);
+        if (indicator) {
+          if (i === slideIndex) {
+            indicator.className = 'slider-indicator w-3 h-3 rounded-full bg-blue-500 transition-all duration-300';
+          } else {
+            indicator.className = 'slider-indicator w-3 h-3 rounded-full bg-blue-500/30 hover:bg-blue-500/60 transition-all duration-300';
+          }
+        }
+      }
+    };
+
+    // Navegación manual como fallback
+    const setupManualNavigation = () => {
+      const slides = document.querySelectorAll('.slide');
+      const totalSlides = slides.length;
+      
+      const goToSlide = (index: number) => {
+        const slider = document.getElementById('product-slider');
+        if (slider) {
+          const translateX = -index * (100 / totalSlides);
+          slider.style.transform = `translateX(${translateX}%)`;
+          setCurrentSlide(index);
+          updateSliderIndicators(index);
+        }
+      };
+
+      // Event listeners para navegación
+      const prevBtn = document.getElementById('slider-prev');
+      const nextBtn = document.getElementById('slider-next');
+      
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+          const newSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+          goToSlide(newSlide);
+        });
+      }
+      
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          const newSlide = (currentSlide + 1) % totalSlides;
+          goToSlide(newSlide);
+        });
+      }
+
+      // Indicadores
+      for (let i = 0; i < totalSlides; i++) {
+        const indicator = document.getElementById(`slider-indicator-${i}`);
+        if (indicator) {
+          indicator.addEventListener('click', () => goToSlide(i));
+        }
+      }
+      
+      // 🎪 EFECTO ESPECIAL: Click en la imagen para "despertar"
+      const shoppingBagImage = document.getElementById('shopping-bag-3d');
+      if (shoppingBagImage) {
+        shoppingBagImage.addEventListener('click', () => {
+          // Efecto de "despertar" - animación especial
+          shoppingBagImage.style.animation = 'none';
+          shoppingBagImage.offsetHeight; // Trigger reflow
+          shoppingBagImage.style.animation = 'imageWakeUp 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards';
+          
+          // Agregar clase temporal para efectos adicionales
+          shoppingBagImage.classList.add('awakened');
+          
+          // 🎆 Crear partículas mágicas
+          createMagicParticles();
+          
+          setTimeout(() => {
+            shoppingBagImage.classList.remove('awakened');
+          }, 1500);
+        });
+        
+        // Efecto de hover mejorado
+        shoppingBagImage.addEventListener('mouseenter', () => {
+          shoppingBagImage.classList.add('hovered');
+        });
+        
+        shoppingBagImage.addEventListener('mouseleave', () => {
+          shoppingBagImage.classList.remove('hovered');
+        });
+      }
+      
+      // 🎆 Función para crear partículas mágicas
+      const createMagicParticles = () => {
+        const container = document.getElementById('particles-container');
+        if (!container) return;
+        
+        // Limpiar partículas anteriores
+        container.innerHTML = '';
+        
+        // Crear 15 partículas
+        for (let i = 0; i < 15; i++) {
+          const particle = document.createElement('div');
+          particle.className = 'magic-particle';
+          
+          // Posición aleatoria
+          const x = Math.random() * 100;
+          const y = Math.random() * 100;
+          
+          // Colores aleatorios
+          const colors = ['#3b82f6', '#06b6d4', '#8b5cf6', '#f59e0b', '#ef4444'];
+          const color = colors[Math.floor(Math.random() * colors.length)];
+          
+          particle.style.cssText = `
+            position: absolute;
+            left: ${x}%;
+            top: ${y}%;
+            width: 6px;
+            height: 6px;
+            background: ${color};
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particleFloat 2s ease-out forwards;
+            box-shadow: 0 0 10px ${color};
+          `;
+          
+          container.appendChild(particle);
+          
+          // Remover partícula después de la animación
+          setTimeout(() => {
+            if (particle.parentNode) {
+              particle.parentNode.removeChild(particle);
+            }
+          }, 2000);
+        }
+      };
+    };
+
+    // Bucle de animación con requestAnimationFrame - ¡IMAGEN CON VIDA!
+    const startAnimationLoop = () => {
+      const animate = () => {
+        const shoppingBagImage = document.getElementById('shopping-bag-3d');
+        
+        // 🎭 ANIMACIONES DINÁMICAS - La imagen cobra vida
+        if (shoppingBagImage && currentSlide === 0) {
+          const time = Date.now() * 0.001;
+          
+          // Debug: Confirmar que la animación está corriendo (solo cada 2 segundos)
+          if (Math.floor(time) % 2 === 0 && Math.floor(time * 10) % 10 === 0) {
+            console.log(`🔄 Imagen animándose - Rotación: ${Math.floor((time * 60) % 360)}°`);
+          }
+          
+          // 🌊 Movimiento flotante MÁS PRONUNCIADO (como si flotara en el aire)
+          const floatY = Math.sin(time * 0.8) * 20; // Movimiento vertical más amplio
+          const floatX = Math.cos(time * 0.6) * 12; // Movimiento horizontal más visible
+          
+          // 🔄 Rotación completa continua (vuelta completa cada 6 segundos - MÁS RÁPIDA)
+          const fullRotation = (time * 60) % 360; // 60 grados por segundo = 6 segundos por vuelta
+          
+          // 🔍 Zoom dinámico MÁS DRAMÁTICO (se hace más grande y más pequeño)
+          const zoomPulse = 1 + Math.sin(time * 0.5) * 0.2; // Oscila entre 0.8x y 1.2x
+          
+          // ✨ Rotación en Y para efecto 3D (bamboleo MÁS PRONUNCIADO)
+          const rotateY = Math.sin(time * 0.7) * 25; // Bamboleo de -25° a +25°
+          
+          // 🎨 Efecto de sombra dinámica que sigue el movimiento
+          const shadowX = floatX * 0.5;
+          const shadowY = 25 + floatY * 0.3;
+          const shadowBlur = 40 + Math.sin(time * 0.5) * 15;
+          const shadowOpacity = 0.3 + Math.sin(time * 0.3) * 0.1;
+          
+          // 🌈 Aplicar todas las transformaciones juntas
+          shoppingBagImage.style.transform = `
+            perspective(1000px)
+            translateX(${floatX}px)
+            translateY(${floatY}px)
+            rotateZ(${fullRotation}deg)
+            rotateY(${rotateY}deg)
+            scale(${zoomPulse})
+          `;
+          
+          // 🎭 Sombra dinámica que sigue el movimiento
+          shoppingBagImage.style.filter = `
+            drop-shadow(${shadowX}px ${shadowY}px ${shadowBlur}px rgba(59, 130, 246, ${shadowOpacity}))
+          `;
+          
+          // 🎪 Efecto adicional: cambio sutil de brillo
+          const brightness = 1 + Math.sin(time * 0.9) * 0.1;
+          shoppingBagImage.style.filter += ` brightness(${brightness})`;
+        }
+        
+        animationFrameRef.current = requestAnimationFrame(animate);
+      };
+      
+      animationFrameRef.current = requestAnimationFrame(animate);
+    };
+
+    // Inicializar después de un pequeño delay para asegurar que el DOM esté listo
+    const timer = setTimeout(() => {
+      initializeSlider();
+      startAnimationLoop();
+    }, 100);
+
+    // Cleanup
+    return () => {
+      clearTimeout(timer);
+      
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      
+      if (smoothyInstanceRef.current && typeof smoothyInstanceRef.current.destroy === 'function') {
+        smoothyInstanceRef.current.destroy();
+        console.log('🧹 Smooothy destruido correctamente');
+      }
+    };
+  }, [currentSlide]); // Dependencia en currentSlide para re-renderizar efectos
+
+  // Cargar Smooothy desde CDN si no está disponible
+  useEffect(() => {
+    const loadSmooothy = () => {
+      if (typeof window !== 'undefined' && !(window as any).Smooothy) {
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/smooothy@latest/dist/smooothy.min.js';
+        script.async = true;
+        script.onload = () => {
+          console.log('📦 Smooothy cargado desde CDN');
+        };
+        script.onerror = () => {
+          console.warn('⚠️ No se pudo cargar Smooothy desde CDN');
+        };
+        document.head.appendChild(script);
+      }
+    };
+
+    loadSmooothy();
   }, []);
 
   const copyToClipboard = (code: string, id: string) => {
@@ -303,6 +635,203 @@ const competitiveAdvantages = [
           </div>
         </div>
       </section> 
+
+      {/* 3D Product Showcase Slider */}
+      <section className="py-20 relative z-10 overflow-hidden">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 text-blue-600 border-blue-500/20">
+              <Sparkles className="h-3 w-3 mr-1" />
+              Product Showcase
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Experience the Future of E-Commerce</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              See how ckPayment transforms your shopping experience with 3D visualization and seamless payments
+            </p>
+          </div>
+
+          {/* Smooothy Slider Container */}
+          <div className="relative max-w-6xl mx-auto">
+            <div 
+              id="product-slider" 
+              className="slider-wrapper overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/5 via-cyan-500/5 to-blue-600/5 backdrop-blur-sm border border-blue-500/20"
+              style={{ height: '500px' }}
+            >
+              {/* Slide 1: 3D Shopping Bag */}
+              <div className="slide flex items-center justify-center p-8" data-slide="0">
+                <div className="slide-content text-center max-w-4xl mx-auto">
+                  <div className="grid md:grid-cols-2 gap-8 items-center">
+                    <div className="order-2 md:order-1">
+                      <h3 className="text-2xl md:text-3xl font-bold mb-4 text-foreground">
+                        Smart Shopping Experience
+                      </h3>
+                      <p className="text-muted-foreground mb-6 leading-relaxed">
+                        Our 3D shopping cart represents the future of e-commerce - 
+                        intuitive, secure, and powered by blockchain technology.
+                      </p>
+                      <div className="flex flex-wrap gap-3 justify-center md:justify-start mb-4">
+                        <Badge variant="secondary" className="bg-blue-500/10 text-blue-600">
+                          <ShoppingCart className="h-3 w-3 mr-1" />
+                          Smart Cart
+                        </Badge>
+                        <Badge variant="secondary" className="bg-cyan-500/10 text-cyan-600">
+                          <CreditCard className="h-3 w-3 mr-1" />
+                          Crypto Payments
+                        </Badge>
+                        <Badge variant="secondary" className="bg-blue-600/10 text-blue-700">
+                          <Globe className="h-3 w-3 mr-1" />
+                          Global Access
+                        </Badge>
+                      </div>
+                      
+                      {/* 🎪 Botón para activar modo súper animado */}
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="border-blue-500/30 text-blue-600 hover:bg-blue-500/10 group"
+                        onClick={() => {
+                          const img = document.getElementById('shopping-bag-3d');
+                          if (img) {
+                            if (img.classList.contains('super-alive')) {
+                              img.classList.remove('super-alive');
+                              img.style.animation = '';
+                            } else {
+                              img.classList.add('super-alive');
+                            }
+                          }
+                        }}
+                      >
+                        <Sparkles className="h-3 w-3 mr-1 group-hover:animate-spin" />
+                        ¡Dale vida!
+                      </Button>
+                    </div>
+                    <div className="order-1 md:order-2 relative">
+                      {/* 🎆 Contenedor de partículas mágicas */}
+                      <div id="particles-container" className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl">
+                        {/* Las partículas se generarán dinámicamente con JavaScript */}
+                      </div>
+                      
+                      <img 
+                        id="shopping-bag-3d"
+                        src="/IMG/CasodeUso1.jpg" 
+                        alt="3D Shopping Bag with Euro Symbol" 
+                        className="main-image w-full h-auto max-h-80 object-contain mx-auto rounded-xl shadow-2xl relative z-10 animate-on-load"
+                        style={{ 
+                          filter: 'drop-shadow(0 20px 40px rgba(59, 130, 246, 0.3))',
+                          transform: 'perspective(1000px) rotateY(-5deg)',
+                          transition: 'none' // Removemos la transición para que la animación JS sea más fluida
+                        }}
+                      />
+                      
+                      {/* 🌟 Indicador de animación activa */}
+                      <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-center">
+                        <div className="text-xs text-blue-500/70 animate-pulse mb-1">
+                          🔄 Rotación automática activa
+                        </div>
+                        <div className="text-xs text-cyan-500/60">
+                          ¡Haz click para efectos especiales! ✨
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Slide 2: Features Overview */}
+              <div className="slide flex items-center justify-center p-8" data-slide="1">
+                <div className="slide-content text-center max-w-4xl mx-auto">
+                  <h3 className="text-2xl md:text-3xl font-bold mb-6 text-foreground">
+                    Revolutionary Payment Features
+                  </h3>
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="feature-card p-6 rounded-xl bg-blue-500/5 border border-blue-500/20 hover:border-blue-500/40 transition-all duration-300">
+                      <Shield className="h-8 w-8 text-blue-500 mx-auto mb-3" />
+                      <h4 className="font-semibold mb-2">Zero Chargebacks</h4>
+                      <p className="text-sm text-muted-foreground">Blockchain-secured transactions eliminate fraud risk</p>
+                    </div>
+                    <div className="feature-card p-6 rounded-xl bg-cyan-500/5 border border-cyan-500/20 hover:border-cyan-500/40 transition-all duration-300">
+                      <Zap className="h-8 w-8 text-cyan-500 mx-auto mb-3" />
+                      <h4 className="font-semibold mb-2">Instant Settlement</h4>
+                      <p className="text-sm text-muted-foreground">Receive payments immediately, no waiting periods</p>
+                    </div>
+                    <div className="feature-card p-6 rounded-xl bg-blue-600/5 border border-blue-600/20 hover:border-blue-600/40 transition-all duration-300">
+                      <DollarSign className="h-8 w-8 text-blue-600 mx-auto mb-3" />
+                      <h4 className="font-semibold mb-2">Lower Fees</h4>
+                      <p className="text-sm text-muted-foreground">Up to 95% reduction in transaction costs</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Slide 3: Integration Preview */}
+              <div className="slide flex items-center justify-center p-8" data-slide="2">
+                <div className="slide-content text-center max-w-4xl mx-auto">
+                  <h3 className="text-2xl md:text-3xl font-bold mb-6 text-foreground">
+                    Easy Integration
+                  </h3>
+                  <div className="bg-muted/10 rounded-xl p-6 border border-blue-500/20">
+                    <pre className="text-left text-sm font-mono text-foreground overflow-x-auto">
+                      <code>{`// Add ckPayment to your store in 3 lines
+import { ckPayment } from '@ckpayment/ecommerce';
+
+ckPayment.init({
+  storeId: 'your-store-id',
+  currencies: ['ckBTC', 'ckETH', 'ICP'],
+  theme: 'modern'
+});
+
+// Create checkout button
+ckPayment.createCheckout({
+  amount: 99.99,
+  currency: 'ckBTC',
+  onSuccess: handlePayment
+});`}</code>
+                    </pre>
+                  </div>
+                  <Button className="mt-6 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600">
+                    <Code className="h-4 w-4 mr-2" />
+                    View Full Documentation
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Slider Navigation */}
+            <div className="flex justify-center mt-8 space-x-3">
+              <button 
+                id="slider-indicator-0" 
+                className="slider-indicator w-3 h-3 rounded-full bg-blue-500 transition-all duration-300"
+                data-slide="0"
+              ></button>
+              <button 
+                id="slider-indicator-1" 
+                className="slider-indicator w-3 h-3 rounded-full bg-blue-500/30 hover:bg-blue-500/60 transition-all duration-300"
+                data-slide="1"
+              ></button>
+              <button 
+                id="slider-indicator-2" 
+                className="slider-indicator w-3 h-3 rounded-full bg-blue-500/30 hover:bg-blue-500/60 transition-all duration-300"
+                data-slide="2"
+              ></button>
+            </div>
+
+            {/* Navigation Arrows */}
+            <button 
+              id="slider-prev" 
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 z-10"
+            >
+              <ArrowLeft className="h-5 w-5 text-blue-600" />
+            </button>
+            <button 
+              id="slider-next" 
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 z-10"
+            >
+              <ArrowRight className="h-5 w-5 text-blue-600" />
+            </button>
+          </div>
+        </div>
+      </section>
+
      {/* E-Commerce Features */}
       <section className="py-20 relative z-10">
         <div className="container mx-auto px-4">

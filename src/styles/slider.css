@@ -1,0 +1,356 @@
+/* Smooothy Slider Styles for ECommerce.tsx */
+
+/* Slider Container */
+.slider-wrapper {
+  display: flex;
+  width: 300%; /* 3 slides = 300% */
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Individual Slides */
+.slide {
+  width: 33.333%; /* 100% / 3 slides */
+  height: 100%;
+  flex-shrink: 0;
+  position: relative;
+}
+
+/* Main 3D Image Styles - ¡IMAGEN CON VIDA! */
+.main-image {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+  will-change: transform, filter;
+  /* Optimizaciones para animaciones suaves */
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+
+/* Hover Effects for 3D Image - MÁS DRAMÁTICO */
+.main-image:hover {
+  /* Pausa la animación automática y aplica hover */
+  animation-play-state: paused !important;
+  transform: perspective(1000px) rotateY(15deg) rotateZ(5deg) scale(1.2) translateY(-10px) !important;
+  filter: drop-shadow(0 30px 60px rgba(59, 130, 246, 0.5)) brightness(1.1) !important;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+/* Animación de entrada para la imagen */
+@keyframes imageEntrance {
+  0% {
+    opacity: 0;
+    transform: perspective(1000px) rotateY(-90deg) scale(0.5);
+  }
+  50% {
+    opacity: 0.7;
+    transform: perspective(1000px) rotateY(-45deg) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1000px) rotateY(0deg) scale(1);
+  }
+}
+
+/* Aplicar animación de entrada */
+.main-image {
+  animation: imageEntrance 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* 🔄 Clase para indicar que la animación está activa */
+.main-image.animate-on-load {
+  /* Asegurar que la animación JavaScript tenga prioridad */
+  transition: none !important;
+  /* Indicador visual de que está animándose */
+  position: relative;
+}
+
+.main-image.animate-on-load::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #3b82f6, #06b6d4, #8b5cf6, #f59e0b);
+  border-radius: 15px;
+  z-index: -1;
+  opacity: 0.3;
+  animation: borderRotate 3s linear infinite;
+}
+
+@keyframes borderRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Efecto de pulsación para cuando está activa */
+@keyframes imagePulse {
+  0%, 100% {
+    transform: perspective(1000px) scale(1);
+  }
+  50% {
+    transform: perspective(1000px) scale(1.05);
+  }
+}
+
+/* Clase para activar pulsación */
+.main-image.pulse {
+  animation: imagePulse 2s ease-in-out infinite;
+}
+
+/* 🎪 ANIMACIÓN DE "DESPERTAR" - Efecto especial al hacer click */
+@keyframes imageWakeUp {
+  0% {
+    transform: perspective(1000px) scale(1) rotateZ(0deg);
+  }
+  25% {
+    transform: perspective(1000px) scale(1.3) rotateZ(10deg) rotateY(20deg);
+    filter: drop-shadow(0 40px 80px rgba(59, 130, 246, 0.8)) brightness(1.3) hue-rotate(30deg);
+  }
+  50% {
+    transform: perspective(1000px) scale(0.9) rotateZ(-15deg) rotateY(-25deg);
+    filter: drop-shadow(0 20px 40px rgba(236, 72, 153, 0.6)) brightness(1.1) hue-rotate(-20deg);
+  }
+  75% {
+    transform: perspective(1000px) scale(1.2) rotateZ(8deg) rotateY(15deg);
+    filter: drop-shadow(0 35px 70px rgba(34, 197, 94, 0.7)) brightness(1.2) hue-rotate(60deg);
+  }
+  100% {
+    transform: perspective(1000px) scale(1) rotateZ(0deg) rotateY(0deg);
+    filter: drop-shadow(0 25px 50px rgba(59, 130, 246, 0.4)) brightness(1);
+  }
+}
+
+/* 🌟 Estado "despierto" - efectos adicionales */
+.main-image.awakened {
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
+  border-radius: 15px;
+}
+
+/* 🎭 Estado hover mejorado */
+.main-image.hovered {
+  cursor: pointer;
+  transform: perspective(1000px) rotateY(10deg) scale(1.1) translateY(-5px) !important;
+  filter: drop-shadow(0 25px 50px rgba(59, 130, 246, 0.5)) brightness(1.15) !important;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+/* 🎨 Animación de rotación completa continua */
+@keyframes continuousRotation {
+  0% {
+    transform: perspective(1000px) rotateZ(0deg);
+  }
+  100% {
+    transform: perspective(1000px) rotateZ(360deg);
+  }
+}
+
+/* 🌊 Animación de flotación */
+@keyframes floatingMotion {
+  0%, 100% {
+    transform: perspective(1000px) translateY(0px) translateX(0px);
+  }
+  25% {
+    transform: perspective(1000px) translateY(-10px) translateX(5px);
+  }
+  50% {
+    transform: perspective(1000px) translateY(0px) translateX(10px);
+  }
+  75% {
+    transform: perspective(1000px) translateY(10px) translateX(5px);
+  }
+}
+
+/* 🔍 Animación de zoom pulsante */
+@keyframes zoomPulse {
+  0%, 100% {
+    transform: perspective(1000px) scale(1);
+  }
+  50% {
+    transform: perspective(1000px) scale(1.1);
+  }
+}
+
+/* Clase combinada para máxima vida */
+.main-image.super-alive {
+  animation: 
+    continuousRotation 8s linear infinite,
+    floatingMotion 4s ease-in-out infinite,
+    zoomPulse 3s ease-in-out infinite;
+  animation-delay: 0s, 0.5s, 1s;
+}
+
+/* 🎆 Animación de partículas mágicas */
+@keyframes particleFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(-20px) scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(-60px) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100px) scale(0.5);
+  }
+}
+
+/* 🌟 Contenedor de partículas */
+#particles-container {
+  z-index: 5;
+}
+
+/* ✨ Efecto de brillo en el contenedor cuando está activo */
+#particles-container.active {
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+  animation: containerGlow 2s ease-in-out;
+}
+
+@keyframes containerGlow {
+  0%, 100% {
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+  }
+  50% {
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+  }
+}
+
+/* Feature Cards Animation */
+.feature-card {
+  transform: translateY(0);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
+}
+
+/* Slider Indicators */
+.slider-indicator {
+  cursor: pointer;
+  transform: scale(1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slider-indicator:hover {
+  transform: scale(1.2);
+}
+
+.slider-indicator.active {
+  transform: scale(1.3);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+
+/* Navigation Buttons */
+#slider-prev,
+#slider-next {
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#slider-prev:hover,
+#slider-next:hover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .slider-wrapper {
+    height: 400px;
+  }
+  
+  .slide {
+    padding: 1rem;
+  }
+  
+  .main-image {
+    max-height: 250px;
+  }
+  
+  #slider-prev,
+  #slider-next {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .slider-indicator {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .slider-wrapper {
+    height: 350px;
+  }
+  
+  .main-image {
+    max-height: 200px;
+  }
+  
+  .feature-card {
+    padding: 1rem;
+  }
+}
+
+/* Performance Optimizations */
+.slide {
+  contain: layout style paint;
+}
+
+.main-image {
+  contain: layout style paint;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Smooth Scrolling for Touch Devices */
+.slider-wrapper {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Loading State */
+.slider-loading {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.slider-loaded {
+  opacity: 1;
+}
+
+/* Accessibility */
+.slider-indicator:focus,
+#slider-prev:focus,
+#slider-next:focus {
+  outline: 2px solid rgba(59, 130, 246, 0.6);
+  outline-offset: 2px;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  #slider-prev,
+  #slider-next {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+  }
+  
+  #slider-prev:hover,
+  #slider-next:hover {
+    background: rgba(0, 0, 0, 0.9);
+  }
+}
