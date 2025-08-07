@@ -68,7 +68,7 @@
     - Implement real-time data refresh with visual loading indicators
     - _Requirements: 1.1, 1.2, 6.1, 6.2_
 
-  - [ ] 4.4 Create Recent Transactions section
+  - [x] 4.4 Create Recent Transactions section
     - Build comprehensive transaction table with columns for TX ID, amount, token, status, user, timestamp
     - Implement search, filtering, and pagination functionality
     - Add refund buttons that trigger on-chain refund transactions

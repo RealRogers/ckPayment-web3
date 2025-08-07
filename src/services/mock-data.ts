@@ -8,7 +8,8 @@ import {
   WebhookLogEntry,
   AuditLogEntry,
   IPWhitelistEntry,
-  DashboardData
+  DashboardData,
+  TransactionData
 } from '@/types/dashboard';
 
 /**
@@ -372,6 +373,129 @@ export class MockDataService {
       ];
       throw new Error(errors[Math.floor(Math.random() * errors.length)]);
     }
+  }
+
+  /**
+   * Generate realistic transaction data
+   */
+  generateTransactionsData(count: number = 50): TransactionData[] {
+    const transactions: TransactionData[] = [];
+    const tokens = ['ckBTC', 'ckETH', 'ICP', 'USD'] as const;
+    const statuses = ['completed', 'pending', 'failed', 'cancelled'] as const;
+    const types = ['payment', 'refund', 'withdrawal', 'deposit'] as const;
+    
+    const users = [
+      { name: 'Alice Johnson', email: 'alice@example.com', principal: 'rdmx6-jaaaa-aaaah-qcaiq-cai' },
+      { name: 'Bob Smith', email: 'bob@example.com', principal: 'rrkah-fqaaa-aaaah-qcaiq-cai' },
+      { name: 'Carol Davis', email: 'carol@example.com', principal: 'ryjl3-tyaaa-aaaah-qcaiq-cai' },
+      { name: 'David Wilson', email: 'david@example.com', principal: 'rdmx6-jaaaa-aaaah-qcaiq-cai' },
+      { name: 'Eva Brown', email: 'eva@example.com', principal: 'rrkah-fqaaa-aaaah-qcaiq-cai' },
+    ];
+
+    for (let i = 0; i < count; i++) {
+      const timestamp = new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000);
+      const token = tokens[Math.floor(Math.random() * tokens.length)];
+      const status = statuses[Math.floor(Math.random() * statuses.length)];
+      const type = types[Math.floor(Math.random() * types.length)];
+      const user = users[Math.floor(Math.random() * users.length)];
+      
+      // Generate realistic amounts based on token
+      let amount: number;
+      let fee: number;
+      
+      switch (token) {
+        case 'ckBTC':
+          amount = Math.random() * 2 + 0.001; // 0.001 - 2 BTC
+          fee = amount * 0.001; // 0.1% fee
+          break;
+        case 'ckETH':
+          amount = Math.random() * 50 + 0.01; // 0.01 - 50 ETH
+          fee = amount * 0.002; // 0.2% fee
+          break;
+        case 'ICP':
+          amount = Math.random() * 1000 + 1; // 1 - 1000 ICP
+          fee = amount * 0.001; // 0.1% fee
+          break;
+        case 'USD':
+          amount = Math.random() * 10000 + 10; // $10 - $10,000
+          fee = Math.max(0.5, amount * 0.029); // 2.9% fee, min $0.50
+          break;
+      }
+
+      const txId = `tx_${Math.random().toString(36).substr(2, 9)}_${i.toString().padStart(3, '0')}`;
+      const txHash = Math.random() > 0.3 ? `0x${Math.random().toString(16).substr(2, 64)}` : undefined;
+
+      transactions.push({
+        id: txId,
+        txHash,
+        amount: Math.round(amount * 1000000) / 1000000, // Round to 6 decimals
+        token,
+        status,
+        type,
+        user: {
+          id: `user_${Math.random().toString(36).substr(2, 9)}`,
+          name: user.name,
+          email: user.email,
+          principal: user.principal,
+          wallet: `${token.toLowerCase()}_wallet_${Math.random().toString(36).substr(2, 8)}`
+        },
+        timestamp: timestamp.toISOString(),
+        fee: Math.round(fee * 1000000) / 1000000,
+        blockHeight: Math.random() > 0.2 ? Math.floor(Math.random() * 1000000) + 5000000 : undefined,
+        confirmations: status === 'completed' ? Math.floor(Math.random() * 100) + 6 : undefined,
+        description: this.generateTransactionDescription(type, token, amount),
+        metadata: {
+          userAgent: 'Mozilla/5.0 (compatible)',
+          ipAddress: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
+          source: Math.random() > 0.5 ? 'web' : 'mobile'
+        },
+        canRefund: status === 'completed' && type === 'payment' && Math.random() > 0.3,
+        refundedAt: status === 'completed' && Math.random() > 0.9 ? 
+          new Date(timestamp.getTime() + Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString() : 
+          undefined,
+        refundTxId: status === 'completed' && Math.random() > 0.9 ? 
+          `refund_${Math.random().toString(36).substr(2, 9)}` : 
+          undefined
+      });
+    }
+
+    // Sort by timestamp (newest first)
+    return transactions.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  }
+
+  private generateTransactionDescription(type: string, token: string, amount: number): string {
+    const descriptions = {
+      payment: [
+        `Payment for premium subscription`,
+        `Purchase of digital goods`,
+        `Service fee payment`,
+        `Monthly subscription renewal`,
+        `One-time purchase`
+      ],
+      refund: [
+        `Refund for cancelled order`,
+        `Service credit refund`,
+        `Overpayment refund`,
+        `Subscription cancellation refund`
+      ],
+      withdrawal: [
+        `Withdrawal to external wallet`,
+        `Transfer to bank account`,
+        `Cash out request`,
+        `Funds withdrawal`
+      ],
+      deposit: [
+        `Deposit from external wallet`,
+        `Bank transfer deposit`,
+        `Account funding`,
+        `Initial deposit`
+      ]
+    };
+
+    const typeDescriptions = descriptions[type as keyof typeof descriptions] || descriptions.payment;
+    const baseDescription = typeDescriptions[Math.floor(Math.random() * typeDescriptions.length)];
+    
+    return `${baseDescription} - ${amount.toFixed(6)} ${token}`;
   }
 
   /**

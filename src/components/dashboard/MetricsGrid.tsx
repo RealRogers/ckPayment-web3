@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import MetricsCard from './MetricsCard';
 import ChartsSection from './ChartsSection';
+import RecentTransactions from './RecentTransactions';
 import { MetricsData } from '@/types/dashboard';
 
 interface MetricsGridProps {
@@ -311,6 +312,13 @@ const MetricsGrid: React.FC<MetricsGridProps> = ({
           metrics={metrics}
         />
       )}
+
+      {/* Recent Transactions Section */}
+      <RecentTransactions
+        loading={loading}
+        error={error}
+        onRefresh={onRefresh}
+      />
     </div>
   );
 };

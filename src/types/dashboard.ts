@@ -299,6 +299,58 @@ export interface EndpointFormData {
   environment: Environment;
 }
 
+// Transaction Models
+export interface TransactionData {
+  id: string;
+  txHash?: string;
+  amount: number;
+  token: 'ICP' | 'ckBTC' | 'ckETH' | 'USD';
+  status: 'completed' | 'pending' | 'failed' | 'cancelled';
+  type: 'payment' | 'refund' | 'withdrawal' | 'deposit';
+  user: {
+    id: string;
+    name?: string;
+    email?: string;
+    principal?: string;
+    wallet?: string;
+  };
+  timestamp: string;
+  fee?: number;
+  blockHeight?: number;
+  confirmations?: number;
+  description?: string;
+  metadata?: Record<string, any>;
+  canRefund: boolean;
+  refundedAt?: string;
+  refundTxId?: string;
+}
+
+export interface TransactionFilters {
+  status?: string[];
+  tokens?: string[];
+  types?: string[];
+  dateRange?: {
+    from: Date;
+    to: Date;
+  };
+  amountRange?: {
+    min: number;
+    max: number;
+  };
+  search?: string;
+}
+
+export interface TransactionTableProps {
+  transactions: TransactionData[];
+  loading?: boolean;
+  error?: boolean;
+  onRefund?: (transactionId: string) => Promise<void>;
+  onViewDetails?: (transaction: TransactionData) => void;
+  onExport?: () => void;
+  filters?: TransactionFilters;
+  onFiltersChange?: (filters: TransactionFilters) => void;
+}
+
 // Utility Types
 export type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
