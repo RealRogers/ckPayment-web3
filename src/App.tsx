@@ -15,6 +15,7 @@ import NFTMarketplaces from "./pages/NFTMarketplaces";
 import Education from "./pages/Education";
 import CreatorEconomy from "./pages/CreatorEconomy";
 import ProfileManagement from "./pages/ProfileManagement";
+import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/creator-economy" element={<CreatorEconomy />} />
           <Route path="/profile-management" element={<ProfileManagement />} />
           <Route path="/ProfileManagement" element={<ProfileManagement />} />
+          <Route path="/dashboard-preview" element={<Dashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

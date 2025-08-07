@@ -8,10 +8,9 @@ import SolutionSection from "./SolutionSection";
 import SecurityTrustSection from "./SecurityTrustSection";
 import UseCasesSection from "./UseCasesSection";
 import PricingSection from "./PricingSection";
-import HowItWorksSection from "./HowItWorksSection";
 import GameChangerSection from "./GameChangerSection";
 import Footer from "./Footer";
-import IntegrationSteps from "./IntegrationSteps";
+import IntegrationHub from "./IntegrationHub";
 import ComparisonSection from "./ComparisonSection";
 import FAQSection from "./FAQSection";
 import EnhancedCTASection from "./EnhancedCTASection";
@@ -126,12 +125,7 @@ const LandingPage = () => {
         </div>
         <div className="relative py-12 md:py-16">
           <div className="relative z-20">
-            <HowItWorksSection />
-          </div>
-        </div>
-        <div className="relative py-12 md:py-16">
-          <div className="relative z-20">
-            <IntegrationSteps />
+            <IntegrationHub />
           </div>
         </div>
         <div className="relative py-12 md:py-16">

@@ -2,6 +2,7 @@ import { Blocks, Rocket, Shield, Zap, Globe, Code2, CheckCircle, ArrowRight, Ext
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import SolutionIcon from "./icons/SolutionIcon";
 
 const SolutionSection = () => {
   const mainFeatures = [
@@ -59,6 +60,12 @@ const SolutionSection = () => {
               <CheckCircle className="h-4 w-4" />
               Revolutionary Web3 Payment Solution
             </div>
+            
+            {/* Solution Icon */}
+            <div className="flex justify-center mb-8">
+              <SolutionIcon size={400} className="drop-shadow-2xl" />
+            </div>
+            
             <h2 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
               ckPayment: Your{" "}
               <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
