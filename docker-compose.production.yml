@@ -1,0 +1,213 @@
+version: '3.8'
+
+services:
+  # Blue-Green Deployment Setup
+  app-blue:
+    image: ${DOCKER_IMAGE:-icp-dashboard:latest}
+    container_name: icp-dashboard-blue
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production
+      - REACT_APP_VERSION=${VERSION:-latest}
+      - REACT_APP_ENVIRONMENT=blue
+      - REACT_APP_WEBSOCKET_URL=${WEBSOCKET_URL}
+      - REACT_APP_API_BASE_URL=${API_BASE_URL}
+      - REACT_APP_CANISTER_ID=${CANISTER_ID}
+      - REACT_APP_SENTRY_DSN=${SENTRY_DSN}
+    volumes:
+      - ./logs/blue:/var/log/nginx
+    networks:
+      - dashboard-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard-blue.rule=Host(`${DOMAIN}`) && PathPrefix(`/blue`)"
+      - "traefik.http.services.dashboard-blue.loadbalancer.server.port=80"
+      - "traefik.http.middlewares.dashboard-blue-strip.stripprefix.prefixes=/blue"
+      - "traefik.http.routers.dashboard-blue.middlewares=dashboard-blue-strip"
+
+  app-green:
+    image: ${DOCKER_IMAGE:-icp-dashboard:latest}
+    container_name: icp-dashboard-green
+    ports:
+      - "3001:80"
+    environment:
+      - NODE_ENV=production
+      - REACT_APP_VERSION=${VERSION:-latest}
+      - REACT_APP_ENVIRONMENT=green
+      - REACT_APP_WEBSOCKET_URL=${WEBSOCKET_URL}
+      - REACT_APP_API_BASE_URL=${API_BASE_URL}
+      - REACT_APP_CANISTER_ID=${CANISTER_ID}
+      - REACT_APP_SENTRY_DSN=${SENTRY_DSN}
+    volumes:
+      - ./logs/green:/var/log/nginx
+    networks:
+      - dashboard-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard-green.rule=Host(`${DOMAIN}`) && PathPrefix(`/green`)"
+      - "traefik.http.services.dashboard-green.loadbalancer.server.port=80"
+      - "traefik.http.middlewares.dashboard-green-strip.stripprefix.prefixes=/green"
+      - "traefik.http.routers.dashboard-green.middlewares=dashboard-green-strip"
+
+  # Load Balancer / Reverse Proxy
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    command:
+      - "--api.insecure=false"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--log.level=INFO"
+      - "--accesslog=true"
+      - "--metrics.prometheus=true"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt
+      - ./traefik-config:/etc/traefik/dynamic
+    networks:
+      - dashboard-network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      # Main dashboard route (points to active environment)
+      - "traefik.http.routers.dashboard.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.dashboard.service=dashboard-active"
+      # Default to blue environment
+      - "traefik.http.services.dashboard-active.loadbalancer.server.url=http://app-blue:80"
+      
+      # HTTP to HTTPS redirect
+      - "traefik.http.routers.dashboard-http.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.dashboard-http.entrypoints=web"
+      - "traefik.http.routers.dashboard-http.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
+  # Monitoring and Observability
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - dashboard-network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3002:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - dashboard-network
+    restart: unless-stopped
+
+  # Log aggregation
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki-config.yml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - dashboard-network
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    volumes:
+      - ./logs:/var/log
+      - ./monitoring/promtail-config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - dashboard-network
+    restart: unless-stopped
+
+  # Health check service
+  healthcheck:
+    image: alpine/curl:latest
+    container_name: healthcheck
+    volumes:
+      - ./scripts:/scripts
+    command: /scripts/health-monitor.sh
+    networks:
+      - dashboard-network
+    restart: unless-stopped
+    depends_on:
+      - app-blue
+      - app-green
+
+  # Backup service
+  backup:
+    image: alpine:latest
+    container_name: backup
+    volumes:
+      - ./data:/data
+      - ./backups:/backups
+      - ./scripts:/scripts
+    command: /scripts/backup.sh
+    networks:
+      - dashboard-network
+    restart: "no"
+    profiles:
+      - backup
+
+networks:
+  dashboard-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  loki-data:
+    driver: local

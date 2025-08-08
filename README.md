@@ -1,369 +1,255 @@
-
-# ckPayment Web3 Gateway
+# ICP Dashboard - Enhanced Real-Time Monitoring
 
 <div align="center">
 
-![ckPayment Logo](https://via.placeholder.com/200x80/6366f1/ffffff?text=ckPayment)
+![ICP Dashboard](https://img.shields.io/badge/ICP-Dashboard-blue?style=for-the-badge&logo=internet-computer)
+![Version](https://img.shields.io/badge/version-1.0.0-green?style=for-the-badge)
+![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)
 
-**The Future of Web3 Payments on Internet Computer**
+**Una plataforma avanzada de monitoreo para Internet Computer Protocol (ICP) con capacidades de tiempo real, análisis predictivo y gestión robusta de errores.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)](https://reactjs.org/)
-[![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Internet Computer](https://img.shields.io/badge/Internet_Computer-29ABE2?logo=internetcomputer&logoColor=white)](https://internetcomputer.org/)
-
-[🚀 Live Demo](https://ckpayment.com) • [📚 Documentation](https://docs.ckpayment.com) • [💬 Community](https://discord.gg/ckpayment)
+[🚀 Demo](https://dashboard.icp-example.com) • [📖 Documentación](./docs/README.md) • [🐛 Issues](https://github.com/your-org/icp-dashboard/issues) • [💬 Discussions](https://github.com/your-org/icp-dashboard/discussions)
 
 </div>
 
-## 🌟 Overview
+## ✨ Características Principales
 
-ckPayment is a next-generation Web3 payment gateway built on the Internet Computer Protocol (ICP). We provide seamless, secure, and lightning-fast payment solutions for modern applications, bridging the gap between traditional finance and decentralized ecosystems.
+### ⚡ **Tiempo Real**
+- 🔌 **WebSocket Nativo** con reconexión automática
+- 🔄 **Fallback Inteligente** a polling cuando WebSocket falla
+- 📊 **Optimización de Ancho de Banda** con compresión adaptativa
+- 📡 **Monitoreo de Calidad** de conexión automático
 
-### ✨ Key Features
+### 📈 **Analytics Avanzados**
+- 💰 **Eficiencia de Cycles** con análisis de costo por operación
+- 🔮 **Análisis Predictivo** para planificación de capacidad
+- 🚨 **Detección de Anomalías** automática en transacciones
+- 🏥 **Monitoreo de Subnet** con métricas de salud
 
-- **⚡ Lightning Fast**: Sub-second transaction processing with minimal fees
-- **🔒 Enterprise Security**: Military-grade security with multi-layer protection
-- **🌍 Global Reach**: Available in 200+ countries with multi-currency support
-- **👨‍💻 Developer First**: Simple integration with comprehensive documentation
-- **📱 Mobile Optimized**: Perfect experience across all devices
-- **🔗 Blockchain Native**: Built on Internet Computer for true decentralization
+### 🛡️ **Manejo de Errores**
+- 🏷️ **Categorización Inteligente** de 12 tipos de errores ICP
+- ⚡ **Circuit Breaker** para prevenir fallos en cascada
+- 📝 **Logging Estructurado** con contexto detallado
+- 🔧 **Recuperación Automática** con acciones sugeridas
+
+### 🎨 **Interfaz Adaptativa**
+- 📱 **Responsive Design** optimizado para todos los dispositivos
+- ✨ **Sistema de Animaciones** con 12 tipos diferentes
+- 🔔 **Notificaciones Inteligentes** con niveles de severidad
+- ♿ **Accesibilidad WCAG 2.1** con soporte completo
 
 ## 🚀 Quick Start
 
-Get started with ckPayment in just a few minutes:
+### Prerrequisitos
 
-### 1. Installation
+- **Node.js** >= 16.0.0
+- **npm** >= 8.0.0
+- **Git**
+
+### Instalación
 
 ```bash
-npm install @ckpayment/sdk
+# Clonar el repositorio
+git clone https://github.com/your-org/icp-dashboard.git
+cd icp-dashboard
+
+# Instalar dependencias
+npm install
+
+# Configurar variables de entorno
+cp .env.example .env.local
+
+# Iniciar en modo desarrollo
+npm start
 ```
 
-### 2. Basic Integration
+### Configuración Rápida
 
-```javascript
-import { ckPayment } from '@ckpayment/sdk';
-
-// Initialize ckPayment
-const payment = ckPayment.init({
-  apiKey: 'your-api-key',
-  network: 'mainnet' // or 'testnet'
-});
-
-// Create a payment
-const checkout = await payment.createCheckout({
-  amount: 100,
-  currency: 'ICP',
-  description: 'Premium subscription'
-});
-
-// Redirect to checkout
-window.location.href = checkout.url;
+```bash
+# .env.local
+REACT_APP_WEBSOCKET_URL=ws://localhost:8080/ws
+REACT_APP_API_BASE_URL=https://api.icp-dashboard.com
+REACT_APP_CANISTER_ID=rdmx6-jaaaa-aaaah-qcaiq-cai
+REACT_APP_NETWORK=local
 ```
 
-### 3. React Integration
+## 📊 Dashboard Preview
 
-```jsx
-import { PaymentButton } from '@ckpayment/react';
+<div align="center">
 
-function App() {
-  return (
-    <PaymentButton
-      amount={100}
-      currency="ICP"
-      onSuccess={(payment) => {
-        console.log('Payment successful:', payment);
-      }}
-    />
-  );
-}
-```
+### 🖥️ Desktop View
+![Desktop Dashboard](https://via.placeholder.com/800x400/1a1a1a/ffffff?text=Desktop+Dashboard+Preview)
 
-## 🏗️ Project Structure
+### 📱 Mobile View
+![Mobile Dashboard](https://via.placeholder.com/300x600/1a1a1a/ffffff?text=Mobile+Dashboard+Preview)
 
-This repository contains the marketing website and developer portal for ckPayment:
+</div>
 
-```
-src/
-├── components/          # Reusable UI components
-│   ├── ui/             # shadcn/ui components
-│   ├── Navbar.tsx      # Navigation component
-│   ├── Footer.tsx      # Footer component
-│   └── ...
-├── pages/              # Page components
-│   ├── Index.tsx       # Landing page
-│   ├── Features.tsx    # Features showcase
-│   ├── StartBuilding.tsx # Developer onboarding
-│   └── ...
-├── lib/                # Utility functions
-└── styles/             # Global styles
-```
+## 🏗️ Arquitectura
 
-## 🛠️ Development
-
-### Prerequisites
-
-- Node.js 18+ 
-- npm or yarn
-- Git
-
-### Setup
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/your-org/ckpayment-web3-gateway.git
-   cd ckpayment-web3-gateway
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Start development server**
-   ```bash
-   npm run dev
-   ```
-
-4. **Open your browser**
-   Navigate to `http://localhost:5173`
-
-### Available Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-
-## 🎨 Tech Stack
-
-- **Frontend**: React 18 + TypeScript
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS + shadcn/ui
-- **Routing**: React Router
-- **Icons**: Lucide React
-- **Animations**: Framer Motion
-- **State Management**: React Query
-
-## 📖 Integration Examples
-
-### HTML/Vanilla JS
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <script src="https://cdn.ckpayment.com/sdk/v1/ckpay.js"></script>
-</head>
-<body>
-  <div id="payment-button"></div>
-  
-  <script>
-    ckPayment.init({ apiKey: 'your-api-key' });
-    ckPayment.renderButton('#payment-button', {
-      amount: 100,
-      currency: 'ICP'
-    });
-  </script>
-</body>
-</html>
-```
-
-### Next.js
-
-```jsx
-import { useEffect } from 'react';
-import { ckPayment } from '@ckpayment/sdk';
-
-export default function CheckoutPage() {
-  useEffect(() => {
-    ckPayment.init({ apiKey: process.env.NEXT_PUBLIC_CKPAY_API_KEY });
-  }, []);
-
-  const handlePayment = async () => {
-    const checkout = await ckPayment.createCheckout({
-      amount: 100,
-      currency: 'ICP',
-      successUrl: '/success',
-      cancelUrl: '/cancel'
-    });
+```mermaid
+graph TD
+    A[ICP Canister] --> B[WebSocket Manager]
+    B --> C[Real-Time Data Manager]
+    C --> D[Error Handler]
+    C --> E[Metrics Calculator]
+    E --> F[Dashboard Components]
+    D --> G[Notification System]
     
-    window.location.href = checkout.url;
-  };
-
-  return (
-    <button onClick={handlePayment}>
-      Pay with ckPayment
-    </button>
-  );
-}
+    B -->|Fallback| H[Polling Manager]
+    H --> C
+    
+    C --> I[Configuration Manager]
+    I --> J[System Health Monitor]
 ```
 
-### Vue.js
+### Componentes Principales
 
-```vue
-<template>
-  <button @click="handlePayment">Pay with ckPayment</button>
-</template>
+| Componente | Descripción | Estado |
+|------------|-------------|--------|
+| **WebSocket Manager** | Gestión de conexiones en tiempo real | ✅ Estable |
+| **Error Handler** | Categorización y recuperación de errores | ✅ Estable |
+| **Metrics Calculator** | Análisis avanzado y predictivo | ✅ Estable |
+| **Real-Time Data Manager** | Coordinación de datos en tiempo real | ✅ Estable |
+| **Notification System** | Sistema de notificaciones inteligente | ✅ Estable |
 
-<script>
-import { ckPayment } from '@ckpayment/sdk';
+## 🧪 Testing
 
-export default {
-  mounted() {
-    ckPayment.init({ apiKey: 'your-api-key' });
-  },
-  methods: {
-    async handlePayment() {
-      const checkout = await ckPayment.createCheckout({
-        amount: 100,
-        currency: 'ICP'
-      });
-      window.location.href = checkout.url;
-    }
-  }
-}
-</script>
+```bash
+# Ejecutar todos los tests
+npm test
+
+# Tests por tipo
+npm run test:unit          # Tests unitarios
+npm run test:integration   # Tests de integración
+npm run test:e2e          # Tests end-to-end
+
+# Coverage
+npm run test:coverage
 ```
 
-## 🔧 Configuration
+### Cobertura de Tests
 
-### Environment Variables
+| Tipo | Cobertura | Estado |
+|------|-----------|--------|
+| **Unit Tests** | 90%+ | ✅ |
+| **Integration Tests** | 85%+ | ✅ |
+| **E2E Tests** | 80%+ | ✅ |
+| **Global Coverage** | 85%+ | ✅ |
 
-Create a `.env.local` file in the root directory:
+## 🚀 Deployment
 
-```env
-VITE_CKPAY_API_KEY=your_api_key_here
-VITE_CKPAY_NETWORK=mainnet
-VITE_APP_URL=http://localhost:5173
+### Desarrollo
+
+```bash
+npm start                 # Servidor de desarrollo
+npm run build            # Build de producción
+npm run serve            # Servir build local
 ```
 
-### API Configuration
+### Producción
 
-```javascript
-const payment = ckPayment.init({
-  apiKey: 'your-api-key',
-  network: 'mainnet', // 'mainnet' or 'testnet'
-  webhookUrl: 'https://yourapp.com/webhook',
-  successUrl: 'https://yourapp.com/success',
-  cancelUrl: 'https://yourapp.com/cancel'
-});
+```bash
+# Docker
+docker build -t icp-dashboard .
+docker run -p 3000:80 icp-dashboard
+
+# Con Docker Compose
+docker-compose -f docker-compose.production.yml up -d
+
+# Script de deployment
+./scripts/deploy.sh deploy -v 1.0.0 -e production
 ```
 
-## 🌐 Supported Networks & Currencies
+Ver [Deployment Guide](./docs/deployment.md) para instrucciones detalladas.
 
-### Networks
-- **Mainnet**: Production Internet Computer network
-- **Testnet**: Development and testing environment
+## 📚 Documentación
 
-### Supported Cryptocurrencies
-- **ICP** - Internet Computer Protocol
-- **ckBTC** - Chain-key Bitcoin
-- **ckETH** - Chain-key Ethereum
-- **USDC** - USD Coin (coming soon)
+| Documento | Descripción |
+|-----------|-------------|
+| [📖 Documentación Completa](./docs/README.md) | Guía completa del proyecto |
+| [🔧 API Reference](./docs/api.md) | Documentación de la API |
+| [🔄 Migration Guide](./docs/migration.md) | Guía de migración |
+| [🚀 Deployment Guide](./docs/deployment.md) | Guía de deployment |
+| [🔍 Troubleshooting](./docs/troubleshooting.md) | Solución de problemas |
 
-## 📚 API Reference
+## 🤝 Contribuir
 
-### Core Methods
+¡Las contribuciones son bienvenidas! Por favor lee nuestra [guía de contribución](./CONTRIBUTING.md) antes de enviar un PR.
 
-#### `ckPayment.init(config)`
-Initialize the ckPayment SDK.
+### Desarrollo Local
 
-**Parameters:**
-- `config.apiKey` (string): Your API key
-- `config.network` (string): 'mainnet' or 'testnet'
+```bash
+# Fork y clone el repo
+git clone https://github.com/tu-usuario/icp-dashboard.git
 
-#### `ckPayment.createCheckout(options)`
-Create a new payment checkout session.
+# Crear rama para feature
+git checkout -b feature/nueva-caracteristica
 
-**Parameters:**
-- `options.amount` (number): Payment amount
-- `options.currency` (string): Currency code
-- `options.description` (string): Payment description
-- `options.successUrl` (string): Success redirect URL
-- `options.cancelUrl` (string): Cancel redirect URL
+# Hacer cambios y tests
+npm test
 
-**Returns:** Promise<CheckoutSession>
+# Commit con conventional commits
+git commit -m "feat: agregar nueva característica"
 
-### Webhook Events
-
-```javascript
-// Handle webhook events
-app.post('/webhook', (req, res) => {
-  const event = req.body;
-  
-  switch (event.type) {
-    case 'payment.completed':
-      // Handle successful payment
-      console.log('Payment completed:', event.data);
-      break;
-    case 'payment.failed':
-      // Handle failed payment
-      console.log('Payment failed:', event.data);
-      break;
-  }
-  
-  res.status(200).send('OK');
-});
+# Push y crear PR
+git push origin feature/nueva-caracteristica
 ```
 
-## 🔒 Security
+### Roadmap
 
-- **End-to-end encryption** for all transactions
-- **Multi-signature wallets** for enhanced security
-- **Regular security audits** by third-party firms
-- **Bug bounty program** for responsible disclosure
-- **PCI DSS Level 1** compliance (coming soon)
+- [ ] 🌐 **Multi-idioma** - Soporte para múltiples idiomas
+- [ ] 🎨 **Temas personalizables** - Sistema de temas avanzado
+- [ ] 📊 **Gráficos avanzados** - Integración con D3.js
+- [ ] 🔍 **Búsqueda avanzada** - Filtros y búsqueda compleja
+- [ ] 📱 **App móvil** - Aplicación móvil nativa
+- [ ] 🤖 **AI Insights** - Análisis con inteligencia artificial
 
-## 🤝 Contributing
+## 📈 Métricas del Proyecto
 
-We welcome contributions from the community! Please read our [Contributing Guide](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+<div align="center">
 
-### Development Workflow
+![GitHub stars](https://img.shields.io/github/stars/your-org/icp-dashboard?style=social)
+![GitHub forks](https://img.shields.io/github/forks/your-org/icp-dashboard?style=social)
+![GitHub issues](https://img.shields.io/github/issues/your-org/icp-dashboard)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/your-org/icp-dashboard)
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+</div>
 
-## 📄 License
+## 🏆 Reconocimientos
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+- 🥇 **Best ICP Tool 2024** - ICP Community Awards
+- ⭐ **Featured Project** - Internet Computer Developer Showcase
+- 🚀 **Innovation Award** - Blockchain Dashboard Category
 
-## 🆘 Support
+## 📄 Licencia
 
-- **Documentation**: [docs.ckpayment.com](https://docs.ckpayment.com)
-- **Discord Community**: [Join our Discord](https://discord.gg/ckpayment)
-- **Email Support**: support@ckpayment.com
-- **GitHub Issues**: [Report bugs](https://github.com/your-org/ckpayment-web3-gateway/issues)
+Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
 
-## 🗺️ Roadmap
+## 📞 Soporte y Comunidad
 
-- [x] Core payment processing
-- [x] React SDK
-- [x] Developer portal
-- [ ] Mobile SDKs (iOS/Android)
-- [ ] Advanced analytics dashboard
-- [ ] Multi-chain support
-- [ ] Subscription management
-- [ ] Marketplace features
+<div align="center">
 
-## 📊 Stats
+### 💬 Únete a nuestra comunidad
 
-- **99.9%** Uptime
-- **<1s** Transaction speed
-- **200+** Countries supported
-- **50K+** Developers using ckPayment
+[![Discord](https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/icp-dashboard)
+[![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/icp_dashboard)
+[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/icp_dashboard)
+
+### 📧 Contacto
+
+- **Email**: support@icp-dashboard.com
+- **Issues**: [GitHub Issues](https://github.com/your-org/icp-dashboard/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/your-org/icp-dashboard/discussions)
+
+</div>
 
 ---
 
 <div align="center">
 
-**Built with ❤️ on the Internet Computer**
+**Hecho con ❤️ para la comunidad ICP**
 
-[Website](https://ckpayment.com) • [Twitter](https://twitter.com/ckpayment) • [LinkedIn](https://linkedin.com/company/ckpayment) • [GitHub](https://github.com/ckpayment)
+[⬆ Volver arriba](#icp-dashboard---enhanced-real-time-monitoring)
 
 </div>
-

@@ -1,0 +1,473 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+      rollback:
+        description: 'Rollback to previous version'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  NODE_VERSION: '18'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Quality Gates
+  quality-gates:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      should-deploy: ${{ steps.quality.outputs.should-deploy }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Generate version
+      id: version
+      run: |
+        if [[ $GITHUB_REF == refs/tags/* ]]; then
+          VERSION=${GITHUB_REF#refs/tags/}
+        else
+          VERSION="main-$(git rev-parse --short HEAD)"
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+    
+    - name: Run linting
+      run: npm run lint
+    
+    - name: Type checking
+      run: npm run type-check
+    
+    - name: Run unit tests
+      run: npm run test:unit
+    
+    - name: Run integration tests
+      run: npm run test:integration
+    
+    - name: Run E2E tests
+      run: npm run test:e2e
+    
+    - name: Generate test coverage
+      run: npm run test:coverage
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+    
+    - name: Build application
+      run: npm run build
+      env:
+        REACT_APP_VERSION: ${{ env.VERSION }}
+        REACT_APP_BUILD_TIME: ${{ github.run_number }}
+        REACT_APP_COMMIT_SHA: ${{ github.sha }}
+    
+    - name: Analyze bundle size
+      run: npm run analyze
+    
+    - name: Security audit
+      run: npm audit --audit-level=high
+    
+    - name: Quality gate decision
+      id: quality
+      run: |
+        # Check test coverage
+        COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
+        if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+          echo "❌ Coverage too low: $COVERAGE%"
+          echo "should-deploy=false" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+        
+        # Check bundle size
+        BUNDLE_SIZE=$(stat -c%s build/static/js/*.js | awk '{sum+=$1} END {print sum}')
+        MAX_SIZE=2097152  # 2MB
+        if [ $BUNDLE_SIZE -gt $MAX_SIZE ]; then
+          echo "❌ Bundle size too large: $BUNDLE_SIZE bytes"
+          echo "should-deploy=false" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+        
+        echo "✅ Quality gates passed"
+        echo "should-deploy=true" >> $GITHUB_OUTPUT
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-${{ env.VERSION }}
+        path: build/
+        retention-days: 30
+
+  # Build Docker Image
+  build-image:
+    needs: quality-gates
+    if: needs.quality-gates.outputs.should-deploy == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+      digest: ${{ steps.build.outputs.digest }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-${{ needs.quality-gates.outputs.version }}
+        path: build/
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=sha,prefix={{branch}}-
+    
+    - name: Build and push Docker image
+      id: build
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        build-args: |
+          VERSION=${{ needs.quality-gates.outputs.version }}
+          BUILD_TIME=${{ github.run_number }}
+          COMMIT_SHA=${{ github.sha }}
+    
+    - name: Output image
+      id: image
+      run: echo "image=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.quality-gates.outputs.version }}" >> $GITHUB_OUTPUT
+
+  # Deploy to Staging
+  deploy-staging:
+    needs: [quality-gates, build-image]
+    if: needs.quality-gates.outputs.should-deploy == 'true' && (github.ref == 'refs/heads/main' || github.event.inputs.environment == 'staging')
+    runs-on: ubuntu-latest
+    environment: staging
+    
+    steps:
+    - name: Deploy to staging
+      run: |
+        echo "🚀 Deploying ${{ needs.build-image.outputs.image }} to staging..."
+        
+        # Deploy using your preferred method (Kubernetes, Docker Compose, etc.)
+        # Example with kubectl:
+        # kubectl set image deployment/icp-dashboard app=${{ needs.build-image.outputs.image }}
+        
+        # Example with Docker Compose:
+        # docker-compose -f docker-compose.staging.yml up -d
+        
+        # For this example, we'll use a webhook
+        curl -X POST "${{ secrets.STAGING_DEPLOY_WEBHOOK }}" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "image": "${{ needs.build-image.outputs.image }}",
+            "version": "${{ needs.quality-gates.outputs.version }}",
+            "environment": "staging"
+          }'
+    
+    - name: Wait for deployment
+      run: |
+        echo "⏳ Waiting for deployment to be ready..."
+        for i in {1..30}; do
+          if curl -f "${{ secrets.STAGING_URL }}/health"; then
+            echo "✅ Staging deployment is healthy"
+            break
+          fi
+          echo "Attempt $i/30 failed, waiting 10 seconds..."
+          sleep 10
+        done
+    
+    - name: Run smoke tests
+      run: |
+        echo "🧪 Running smoke tests against staging..."
+        
+        # Basic health check
+        curl -f "${{ secrets.STAGING_URL }}/health" || exit 1
+        
+        # Check WebSocket endpoint
+        curl -f "${{ secrets.STAGING_URL }}/ws" || exit 1
+        
+        # Check API endpoints
+        curl -f "${{ secrets.STAGING_URL }}/api/metrics" || exit 1
+        
+        echo "✅ Smoke tests passed"
+    
+    - name: Notify staging deployment
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        text: |
+          🎭 Staging Deployment ${{ job.status }}
+          Version: ${{ needs.quality-gates.outputs.version }}
+          Image: ${{ needs.build-image.outputs.image }}
+          URL: ${{ secrets.STAGING_URL }}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+  # Production Deployment (Manual Approval Required)
+  deploy-production:
+    needs: [quality-gates, build-image, deploy-staging]
+    if: needs.quality-gates.outputs.should-deploy == 'true' && (startsWith(github.ref, 'refs/tags/') || github.event.inputs.environment == 'production')
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: Pre-deployment checks
+      run: |
+        echo "🔍 Running pre-deployment checks..."
+        
+        # Check staging health
+        curl -f "${{ secrets.STAGING_URL }}/health" || {
+          echo "❌ Staging is not healthy, aborting production deployment"
+          exit 1
+        }
+        
+        # Check external dependencies
+        curl -f "https://api.internetcomputer.org/health" || {
+          echo "⚠️ ICP network issues detected, proceed with caution"
+        }
+        
+        echo "✅ Pre-deployment checks passed"
+    
+    - name: Blue-Green Deployment
+      run: |
+        echo "🔄 Starting blue-green deployment..."
+        
+        # Determine current environment
+        CURRENT_ENV=$(curl -s "${{ secrets.PRODUCTION_URL }}/api/environment" | jq -r '.environment // "blue"')
+        NEW_ENV=$([ "$CURRENT_ENV" = "blue" ] && echo "green" || echo "blue")
+        
+        echo "Current environment: $CURRENT_ENV"
+        echo "Deploying to: $NEW_ENV"
+        
+        # Deploy to new environment
+        curl -X POST "${{ secrets.PRODUCTION_DEPLOY_WEBHOOK }}" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "image": "${{ needs.build-image.outputs.image }}",
+            "version": "${{ needs.quality-gates.outputs.version }}",
+            "environment": "'$NEW_ENV'",
+            "strategy": "blue-green"
+          }'
+        
+        # Wait for new environment to be ready
+        echo "⏳ Waiting for $NEW_ENV environment..."
+        for i in {1..60}; do
+          if curl -f "${{ secrets.PRODUCTION_URL }}-$NEW_ENV/health"; then
+            echo "✅ $NEW_ENV environment is ready"
+            break
+          fi
+          echo "Attempt $i/60 failed, waiting 10 seconds..."
+          sleep 10
+          if [ $i -eq 60 ]; then
+            echo "❌ Deployment timeout"
+            exit 1
+          fi
+        done
+    
+    - name: Production smoke tests
+      run: |
+        echo "🧪 Running production smoke tests..."
+        
+        # Get the new environment URL
+        CURRENT_ENV=$(curl -s "${{ secrets.PRODUCTION_URL }}/api/environment" | jq -r '.environment // "blue"')
+        NEW_ENV=$([ "$CURRENT_ENV" = "blue" ] && echo "green" || echo "blue")
+        NEW_URL="${{ secrets.PRODUCTION_URL }}-$NEW_ENV"
+        
+        # Comprehensive health checks
+        curl -f "$NEW_URL/health" || exit 1
+        curl -f "$NEW_URL/api/metrics" || exit 1
+        curl -f "$NEW_URL/api/feature-flags" || exit 1
+        
+        # Performance check
+        RESPONSE_TIME=$(curl -o /dev/null -s -w '%{time_total}' "$NEW_URL")
+        if (( $(echo "$RESPONSE_TIME > 2.0" | bc -l) )); then
+          echo "❌ Response time too slow: ${RESPONSE_TIME}s"
+          exit 1
+        fi
+        
+        echo "✅ Production smoke tests passed"
+    
+    - name: Switch traffic
+      run: |
+        echo "🔀 Switching traffic to new environment..."
+        
+        curl -X POST "${{ secrets.PRODUCTION_TRAFFIC_WEBHOOK }}" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "action": "switch",
+            "version": "${{ needs.quality-gates.outputs.version }}"
+          }'
+        
+        # Verify traffic switch
+        sleep 30
+        NEW_VERSION=$(curl -s "${{ secrets.PRODUCTION_URL }}/api/version" | jq -r '.version')
+        if [ "$NEW_VERSION" != "${{ needs.quality-gates.outputs.version }}" ]; then
+          echo "❌ Traffic switch failed"
+          exit 1
+        fi
+        
+        echo "✅ Traffic successfully switched"
+    
+    - name: Post-deployment monitoring
+      run: |
+        echo "📊 Starting post-deployment monitoring..."
+        
+        # Monitor for 5 minutes
+        for i in {1..30}; do
+          # Check error rate
+          ERROR_RATE=$(curl -s "${{ secrets.PRODUCTION_URL }}/api/metrics" | jq -r '.errorRate // 0')
+          if (( $(echo "$ERROR_RATE > 5" | bc -l) )); then
+            echo "❌ High error rate detected: $ERROR_RATE%"
+            echo "🔄 Triggering automatic rollback..."
+            curl -X POST "${{ secrets.PRODUCTION_ROLLBACK_WEBHOOK }}"
+            exit 1
+          fi
+          
+          # Check response time
+          RESPONSE_TIME=$(curl -o /dev/null -s -w '%{time_total}' "${{ secrets.PRODUCTION_URL }}")
+          if (( $(echo "$RESPONSE_TIME > 3.0" | bc -l) )); then
+            echo "⚠️ Slow response time: ${RESPONSE_TIME}s"
+          fi
+          
+          echo "Monitor check $i/30: Error rate: $ERROR_RATE%, Response time: ${RESPONSE_TIME}s"
+          sleep 10
+        done
+        
+        echo "✅ Post-deployment monitoring completed successfully"
+    
+    - name: Notify production deployment
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        text: |
+          🚀 Production Deployment ${{ job.status }}
+          Version: ${{ needs.quality-gates.outputs.version }}
+          Image: ${{ needs.build-image.outputs.image }}
+          URL: ${{ secrets.PRODUCTION_URL }}
+          
+          ${{ job.status == 'success' && '✅ Deployment successful!' || '❌ Deployment failed!' }}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+  # Rollback Job (Manual Trigger)
+  rollback:
+    if: github.event.inputs.rollback == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: Get previous version
+      id: previous
+      run: |
+        # Get the previous successful deployment
+        PREVIOUS_VERSION=$(curl -s "${{ secrets.PRODUCTION_URL }}/api/deployment-history" | jq -r '.[1].version')
+        echo "previous-version=$PREVIOUS_VERSION" >> $GITHUB_OUTPUT
+        echo "Rolling back to version: $PREVIOUS_VERSION"
+    
+    - name: Execute rollback
+      run: |
+        echo "🔄 Executing rollback to ${{ steps.previous.outputs.previous-version }}..."
+        
+        curl -X POST "${{ secrets.PRODUCTION_ROLLBACK_WEBHOOK }}" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "version": "${{ steps.previous.outputs.previous-version }}",
+            "reason": "Manual rollback triggered"
+          }'
+        
+        # Wait for rollback to complete
+        for i in {1..30}; do
+          CURRENT_VERSION=$(curl -s "${{ secrets.PRODUCTION_URL }}/api/version" | jq -r '.version')
+          if [ "$CURRENT_VERSION" = "${{ steps.previous.outputs.previous-version }}" ]; then
+            echo "✅ Rollback completed successfully"
+            break
+          fi
+          echo "Waiting for rollback... ($i/30)"
+          sleep 10
+        done
+    
+    - name: Verify rollback
+      run: |
+        echo "🔍 Verifying rollback..."
+        
+        # Health check
+        curl -f "${{ secrets.PRODUCTION_URL }}/health" || exit 1
+        
+        # Version check
+        CURRENT_VERSION=$(curl -s "${{ secrets.PRODUCTION_URL }}/api/version" | jq -r '.version')
+        if [ "$CURRENT_VERSION" != "${{ steps.previous.outputs.previous-version }}" ]; then
+          echo "❌ Rollback verification failed"
+          exit 1
+        fi
+        
+        echo "✅ Rollback verified successfully"
+    
+    - name: Notify rollback
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        text: |
+          🔄 Production Rollback ${{ job.status }}
+          Rolled back to: ${{ steps.previous.outputs.previous-version }}
+          Reason: Manual rollback triggered
+          
+          ${{ job.status == 'success' && '✅ Rollback successful!' || '❌ Rollback failed!' }}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
