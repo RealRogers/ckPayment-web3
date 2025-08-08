@@ -9,7 +9,16 @@ import {
   AuditLogEntry,
   IPWhitelistEntry,
   DashboardData,
-  TransactionData
+  TransactionData,
+  ICPTransactionData,
+  ICPMetricsData,
+  ICPChartDataPoint,
+  SubnetInfo,
+  SubnetHealthScore,
+  CanisterCall,
+  CycleUsageAnalytics,
+  CycleDataPoint,
+  PerformanceMetrics
 } from '@/types/dashboard';
 
 /**
@@ -512,6 +521,400 @@ export class MockDataService {
       
       this.lastGenerated = now;
     }
+  }
+
+  // ===== ICP-SPECIFIC DATA GENERATION METHODS =====
+
+  /**
+   * Generate ICP-specific transaction data with blockchain details
+   */
+  generateICPTransactionsData(count: number = 50): ICPTransactionData[] {
+    const baseTransactions = this.generateTransactionsData(count);
+    const subnets = this.generateSubnetInfos();
+    const canisters = this.generateCanisterIds();
+    
+    return baseTransactions.map((tx, index) => {
+      const subnet = subnets[Math.floor(Math.random() * subnets.length)];
+      const canisterId = canisters[Math.floor(Math.random() * canisters.length)];
+      
+      // Calculate realistic cycle costs based on transaction complexity
+      const baseCycleCost = this.calculateBaseCycleCost(tx.type, tx.amount);
+      const cycleCost = BigInt(Math.floor(baseCycleCost * (0.8 + Math.random() * 0.4))); // ±20% variation
+      
+      // Generate performance metrics
+      const executionTime = Math.floor(Math.random() * 50000 + 5000); // 5-55ms in microseconds
+      const memoryUsage = Math.floor(Math.random() * 1024 * 1024 + 512 * 1024); // 0.5-1.5MB
+      const instructionCount = BigInt(Math.floor(cycleCost / BigInt(4))); // Rough estimate: 4 cycles per instruction
+      
+      // Generate call hierarchy for complex transactions
+      const callHierarchy = Math.random() > 0.7 ? this.generateCallHierarchy(canisterId, cycleCost) : undefined;
+      
+      // Generate cycle balance information
+      const cycleBalance = {
+        before: BigInt(Math.floor(Math.random() * 1000000000000 + 100000000000)), // 100B-1T cycles
+        after: BigInt(0),
+        burned: cycleCost,
+        refunded: BigInt(Math.floor(Number(cycleCost) * 0.1 * Math.random())) // 0-10% refund
+      };
+      cycleBalance.after = cycleBalance.before - cycleBalance.burned + cycleBalance.refunded;
+
+      const icpTransaction: ICPTransactionData = {
+        ...tx,
+        // ICP-specific blockchain fields
+        cycleCost,
+        subnetId: subnet.id,
+        canisterId,
+        methodName: this.generateMethodName(tx.type),
+        
+        // Inter-canister call information
+        callHierarchy,
+        
+        // Performance metrics
+        executionTime,
+        memoryUsage,
+        instructionCount,
+        
+        // Subnet information
+        subnetMetrics: {
+          uptime: subnet.uptime,
+          responseTime: Math.floor(Math.random() * 200 + 50), // 50-250ms
+          throughput: Math.floor(Math.random() * 1000 + 100), // 100-1100 TPS
+          errorRate: Math.random() * 2 // 0-2% error rate
+        },
+        
+        // Consensus information
+        consensusRound: BigInt(Math.floor(Math.random() * 1000000 + 500000)),
+        certificateHash: Math.random() > 0.3 ? `cert_${Math.random().toString(16).substr(2, 32)}` : undefined,
+        
+        // Cycle balance information
+        cycleBalance
+      };
+
+      return icpTransaction;
+    });
+  }
+
+  /**
+   * Generate ICP-specific metrics data with cycle and subnet information
+   */
+  generateICPMetricsData(): ICPMetricsData {
+    const baseMetrics = this.generateMetricsData();
+    const subnets = this.generateSubnetInfos();
+    
+    // Calculate cycle metrics
+    const totalCyclesUsed = BigInt(Math.floor(Math.random() * 1000000000000 + 100000000000)); // 100B-1T cycles
+    const averageCyclePerTransaction = BigInt(Math.floor(Number(totalCyclesUsed) / baseMetrics.transactions));
+    const cycleEfficiency = Math.random() * 2 + 3; // 3-5 cycles per instruction
+    const cyclesBurned = BigInt(Math.floor(Number(totalCyclesUsed) * 0.95)); // 95% burned
+    const cyclesRefunded = totalCyclesUsed - cyclesBurned;
+    
+    // Generate subnet metrics
+    const subnetMetrics: { [subnetId: string]: any } = {};
+    subnets.forEach(subnet => {
+      subnetMetrics[subnet.id] = {
+        uptime: subnet.uptime,
+        averageResponseTime: Math.floor(Math.random() * 200 + 50),
+        throughput: Math.floor(Math.random() * 1000 + 100),
+        errorRate: Math.random() * 2,
+        consensusHealth: Math.random() * 10 + 90, // 90-100%
+        lastUpdated: new Date().toISOString(),
+        nodeCount: subnet.nodeCount,
+        replicationFactor: subnet.replicationFactor
+      };
+    });
+    
+    // Generate canister health
+    const canisterHealth = {
+      memoryUsage: Math.floor(Math.random() * 2 * 1024 * 1024 * 1024), // 0-2GB
+      cycleBalance: BigInt(Math.floor(Math.random() * 1000000000000 + 100000000000)),
+      freezingThreshold: BigInt(Math.floor(Math.random() * 1000000000 + 100000000)),
+      status: ['running', 'stopping', 'stopped'][Math.floor(Math.random() * 3)] as 'running' | 'stopping' | 'stopped',
+      controllers: [`controller_${Math.random().toString(36).substr(2, 8)}`],
+      moduleHash: `module_${Math.random().toString(16).substr(2, 32)}`,
+      lastUpgrade: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+      computeAllocation: Math.floor(Math.random() * 100),
+      memoryAllocation: Math.floor(Math.random() * 8 * 1024 * 1024 * 1024) // 0-8GB
+    };
+    
+    // Generate performance trends
+    const performanceTrends = {
+      cycleUsageTrend: (Math.random() - 0.5) * 20, // -10% to +10%
+      throughputTrend: (Math.random() - 0.5) * 15,
+      errorRateTrend: (Math.random() - 0.5) * 10,
+      responseTimeTrend: (Math.random() - 0.5) * 25,
+      memoryUsageTrend: (Math.random() - 0.5) * 30
+    };
+    
+    // Generate network statistics
+    const networkStats = {
+      totalSubnets: subnets.length,
+      totalCanisters: Math.floor(Math.random() * 100000 + 50000),
+      networkThroughput: Math.floor(Math.random() * 10000 + 5000),
+      averageSubnetLoad: Math.random() * 30 + 40, // 40-70%
+      networkUptime: Math.random() * 2 + 98 // 98-100%
+    };
+
+    const icpMetrics: ICPMetricsData = {
+      ...baseMetrics,
+      cycleMetrics: {
+        totalCyclesUsed,
+        averageCyclePerTransaction,
+        cycleEfficiency,
+        cyclesBurned,
+        cyclesRefunded,
+        cycleCostTrend: (Math.random() - 0.5) * 15
+      },
+      subnetMetrics,
+      canisterHealth,
+      performanceTrends,
+      networkStats
+    };
+
+    return icpMetrics;
+  }
+
+  /**
+   * Generate realistic subnet information
+   */
+  private generateSubnetInfos(): SubnetInfo[] {
+    const subnetTypes = ['application', 'system', 'fiduciary', 'verified_application'] as const;
+    const locations = [
+      ['US-East', 'US-West'],
+      ['Europe-North', 'Europe-Central'],
+      ['Asia-Pacific', 'Asia-East'],
+      ['Global-Distributed']
+    ];
+    
+    return Array.from({ length: Math.floor(Math.random() * 8) + 5 }, (_, i) => ({
+      id: `subnet_${Math.random().toString(36).substr(2, 8)}`,
+      type: subnetTypes[Math.floor(Math.random() * subnetTypes.length)],
+      nodeCount: Math.floor(Math.random() * 20) + 13, // 13-32 nodes
+      replicationFactor: Math.floor(Math.random() * 3) + 3, // 3-5 replication
+      location: locations[Math.floor(Math.random() * locations.length)],
+      features: ['consensus', 'execution', 'networking'].slice(0, Math.floor(Math.random() * 3) + 1),
+      status: Math.random() > 0.1 ? 'active' : (Math.random() > 0.5 ? 'degraded' : 'maintenance'),
+      uptime: Math.random() * 5 + 95 // 95-100% uptime
+    }));
+  }
+
+  /**
+   * Generate realistic canister IDs
+   */
+  private generateCanisterIds(): string[] {
+    return Array.from({ length: 10 }, () => 
+      `${Math.random().toString(36).substr(2, 5)}-${Math.random().toString(36).substr(2, 5)}-aaaah-qcaiq-cai`
+    );
+  }
+
+  /**
+   * Calculate base cycle cost for different transaction types
+   */
+  private calculateBaseCycleCost(type: string, amount: number): number {
+    const baseCosts = {
+      payment: 50000000, // 50M cycles
+      refund: 30000000,  // 30M cycles
+      withdrawal: 40000000, // 40M cycles
+      deposit: 35000000  // 35M cycles
+    };
+    
+    const baseCost = baseCosts[type as keyof typeof baseCosts] || baseCosts.payment;
+    
+    // Add complexity based on amount (larger amounts = more validation = more cycles)
+    const complexityMultiplier = 1 + Math.log10(amount + 1) * 0.1;
+    
+    return Math.floor(baseCost * complexityMultiplier);
+  }
+
+  /**
+   * Generate method names based on transaction type
+   */
+  private generateMethodName(type: string): string {
+    const methodNames = {
+      payment: ['process_payment', 'execute_transfer', 'handle_payment'],
+      refund: ['process_refund', 'execute_refund', 'handle_refund'],
+      withdrawal: ['process_withdrawal', 'execute_withdrawal', 'handle_withdrawal'],
+      deposit: ['process_deposit', 'execute_deposit', 'handle_deposit']
+    };
+    
+    const methods = methodNames[type as keyof typeof methodNames] || methodNames.payment;
+    return methods[Math.floor(Math.random() * methods.length)];
+  }
+
+  /**
+   * Generate inter-canister call hierarchy
+   */
+  private generateCallHierarchy(rootCanisterId: string, totalCycles: bigint): CanisterCall['callHierarchy'] {
+    const callCount = Math.floor(Math.random() * 3) + 1; // 1-3 calls
+    const hierarchy: CanisterCall['callHierarchy'] = [];
+    const canisters = this.generateCanisterIds();
+    
+    let remainingCycles = totalCycles;
+    
+    for (let i = 0; i < callCount; i++) {
+      const cycleCost = i === callCount - 1 
+        ? remainingCycles // Last call gets remaining cycles
+        : BigInt(Math.floor(Number(remainingCycles) * (0.2 + Math.random() * 0.6))); // 20-80% of remaining
+      
+      hierarchy.push({
+        caller: i === 0 ? rootCanisterId : canisters[i - 1],
+        callee: canisters[i],
+        method: this.generateMethodName('payment'),
+        cycleCost,
+        depth: i + 1
+      });
+      
+      remainingCycles -= cycleCost;
+    }
+    
+    return hierarchy;
+  }
+
+  /**
+   * Generate subnet health scores
+   */
+  generateSubnetHealthScores(): SubnetHealthScore[] {
+    const subnets = this.generateSubnetInfos();
+    
+    return subnets.map(subnet => {
+      const responseTime = Math.random() * 200 + 50; // 50-250ms
+      const throughput = Math.random() * 1000 + 100; // 100-1100 TPS
+      const errorRate = Math.random() * 2; // 0-2%
+      const consensusHealth = Math.random() * 10 + 90; // 90-100%
+      const nodeHealth = Math.random() * 5 + 95; // 95-100%
+      
+      // Calculate factor scores (0-100)
+      const factors = {
+        responseTime: Math.max(0, 100 - (responseTime - 50) / 2), // Lower is better
+        throughput: Math.min(100, throughput / 10), // Higher is better
+        errorRate: Math.max(0, 100 - errorRate * 50), // Lower is better
+        consensusHealth,
+        nodeHealth
+      };
+      
+      // Calculate overall score
+      const overall = Object.values(factors).reduce((sum, score) => sum + score, 0) / Object.keys(factors).length;
+      const uptime = subnet.uptime;
+      const performance = (factors.responseTime + factors.throughput) / 2;
+      const reliability = (factors.errorRate + factors.consensusHealth + factors.nodeHealth) / 3;
+      
+      // Generate recommendations based on scores
+      const recommendations: string[] = [];
+      if (factors.responseTime < 70) recommendations.push('Consider optimizing response time');
+      if (factors.throughput < 50) recommendations.push('Monitor throughput capacity');
+      if (factors.errorRate < 80) recommendations.push('Investigate error patterns');
+      if (factors.consensusHealth < 95) recommendations.push('Check consensus mechanism health');
+      if (factors.nodeHealth < 98) recommendations.push('Review node status and connectivity');
+      
+      return {
+        overall: Math.round(overall),
+        uptime: Math.round(uptime),
+        performance: Math.round(performance),
+        reliability: Math.round(reliability),
+        factors: {
+          responseTime: Math.round(factors.responseTime),
+          throughput: Math.round(factors.throughput),
+          errorRate: Math.round(factors.errorRate),
+          consensusHealth: Math.round(factors.consensusHealth),
+          nodeHealth: Math.round(factors.nodeHealth)
+        },
+        recommendations
+      };
+    });
+  }
+
+  /**
+   * Generate cycle usage analytics
+   */
+  generateCycleUsageAnalytics(): CycleUsageAnalytics {
+    const totalUsage = BigInt(Math.floor(Math.random() * 1000000000000 + 100000000000));
+    
+    // Generate usage by method
+    const methods = ['process_payment', 'execute_transfer', 'handle_refund', 'validate_transaction'];
+    const usageByMethod = new Map<string, bigint>();
+    let remainingUsage = totalUsage;
+    
+    methods.forEach((method, index) => {
+      const usage = index === methods.length - 1 
+        ? remainingUsage
+        : BigInt(Math.floor(Number(remainingUsage) * Math.random() * 0.4));
+      usageByMethod.set(method, usage);
+      remainingUsage -= usage;
+    });
+    
+    // Generate usage by canister
+    const canisters = this.generateCanisterIds().slice(0, 5);
+    const usageByCanister = new Map<string, bigint>();
+    remainingUsage = totalUsage;
+    
+    canisters.forEach((canister, index) => {
+      const usage = index === canisters.length - 1
+        ? remainingUsage
+        : BigInt(Math.floor(Number(remainingUsage) * Math.random() * 0.3));
+      usageByCanister.set(canister, usage);
+      remainingUsage -= usage;
+    });
+    
+    // Generate usage by subnet
+    const subnets = this.generateSubnetInfos().slice(0, 3);
+    const usageBySubnet = new Map<string, bigint>();
+    remainingUsage = totalUsage;
+    
+    subnets.forEach((subnet, index) => {
+      const usage = index === subnets.length - 1
+        ? remainingUsage
+        : BigInt(Math.floor(Number(remainingUsage) * Math.random() * 0.4));
+      usageBySubnet.set(subnet.id, usage);
+      remainingUsage -= usage;
+    });
+    
+    // Generate efficiency metrics
+    const efficiency = {
+      cyclesPerInstruction: Math.random() * 2 + 3, // 3-5 cycles per instruction
+      cyclesPerByte: Math.random() * 1000 + 500, // 500-1500 cycles per byte
+      cyclesPerSecond: Number(totalUsage) / (24 * 60 * 60) // Daily usage spread over seconds
+    };
+    
+    // Generate trend data
+    const generateTrendData = (granularity: 'hourly' | 'daily' | 'weekly'): CycleDataPoint[] => {
+      const points = granularity === 'hourly' ? 24 : granularity === 'daily' ? 30 : 12;
+      const data: CycleDataPoint[] = [];
+      
+      for (let i = 0; i < points; i++) {
+        const cycles = BigInt(Math.floor(Number(totalUsage) / points * (0.8 + Math.random() * 0.4)));
+        const transactions = Math.floor(Math.random() * 1000 + 100);
+        const efficiency = Number(cycles) / transactions;
+        
+        data.push({
+          timestamp: new Date(Date.now() - i * (granularity === 'hourly' ? 60 * 60 * 1000 : 
+                                                granularity === 'daily' ? 24 * 60 * 60 * 1000 : 
+                                                7 * 24 * 60 * 60 * 1000)).toISOString(),
+          cycles,
+          transactions,
+          efficiency
+        });
+      }
+      
+      return data.reverse();
+    };
+    
+    return {
+      totalUsage,
+      usageByMethod,
+      usageByCanister,
+      usageBySubnet,
+      efficiency,
+      trends: {
+        hourly: generateTrendData('hourly'),
+        daily: generateTrendData('daily'),
+        weekly: generateTrendData('weekly')
+      },
+      predictions: {
+        nextHour: BigInt(Math.floor(Number(totalUsage) / 24 * (0.9 + Math.random() * 0.2))),
+        nextDay: BigInt(Math.floor(Number(totalUsage) * (0.95 + Math.random() * 0.1))),
+        nextWeek: BigInt(Math.floor(Number(totalUsage) * 7 * (0.98 + Math.random() * 0.04))),
+        confidence: Math.random() * 0.2 + 0.8 // 80-100% confidence
+      }
+    };
   }
 }
 

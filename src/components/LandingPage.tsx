@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import HeroSection from "./HeroSection";
+import LinkySection from "./LinkySection";
 import ScrollIndicator from "./ScrollIndicator";
 import ProblemCards from "./ProblemCards";
 import SolutionSection from "./SolutionSection";

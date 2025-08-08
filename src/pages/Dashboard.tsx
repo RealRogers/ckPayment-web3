@@ -22,6 +22,7 @@ import {
 } from '@/types/dashboard';
 import { useICPData } from '@/hooks/useICPData';
 import MetricsGrid from '@/components/dashboard/MetricsGrid';
+import AnimatedBackground from '@/components/AnimatedBackground';
 
 const Dashboard: React.FC<DashboardProps> = ({ 
   defaultTab = 'analytics',
@@ -65,9 +66,12 @@ const Dashboard: React.FC<DashboardProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Animated Background */}
+      <AnimatedBackground />
+      
       {/* Header */}
-      <header className="border-b border-border/30 bg-background/80 backdrop-blur-lg sticky top-0 z-50">
+      <header className="border-b border-border/30 bg-background/80 backdrop-blur-lg sticky top-0 z-50 relative">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -117,7 +121,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 relative z-10">
         <div className="max-w-7xl mx-auto">
           {/* Dashboard Header */}
           <div className="mb-8">

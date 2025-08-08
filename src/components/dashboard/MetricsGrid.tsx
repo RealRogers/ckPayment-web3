@@ -80,7 +80,7 @@ const MetricsGrid: React.FC<MetricsGridProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Main KPI Metrics */}
       <div>
         <h3 className="text-lg font-semibold mb-4 flex items-center space-x-2">
@@ -166,7 +166,7 @@ const MetricsGrid: React.FC<MetricsGridProps> = ({
       </div>
 
       {/* ICP-Specific Metrics */}
-      <div>
+      <div className="pt-4">
         <h3 className="text-lg font-semibold mb-4 flex items-center space-x-2">
           <Zap className="h-5 w-5" />
           <span>ICP Blockchain Metrics</span>
@@ -240,7 +240,7 @@ const MetricsGrid: React.FC<MetricsGridProps> = ({
 
       {/* Token Breakdown */}
       {icpMetrics?.tokenBreakdown && (
-        <div>
+        <div className="pt-4">
           <h3 className="text-lg font-semibold mb-4 flex items-center space-x-2">
             <Coins className="h-5 w-5" />
             <span>Token Distribution</span>
@@ -302,7 +302,8 @@ const MetricsGrid: React.FC<MetricsGridProps> = ({
 
       {/* Charts Section */}
       {metrics?.chartData && (
-        <ChartsSection
+        <div className="pt-6">
+          <ChartsSection
           chartData={metrics.chartData}
           loading={loading}
           error={error}
@@ -311,14 +312,17 @@ const MetricsGrid: React.FC<MetricsGridProps> = ({
           onRefresh={onRefresh}
           metrics={metrics}
         />
+        </div>
       )}
 
       {/* Recent Transactions Section */}
-      <RecentTransactions
+      <div className="pt-6">
+        <RecentTransactions
         loading={loading}
         error={error}
         onRefresh={onRefresh}
       />
+      </div>
     </div>
   );
 };

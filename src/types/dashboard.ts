@@ -389,3 +389,450 @@ export const PERMISSIONS = [
   'admin_access',
   'read_logs'
 ] as const;
+
+// ICP-Specific Enhanced Models
+export interface ICPTransactionData extends TransactionData {
+  // ICP-specific blockchain fields
+  cycleCost: bigint;
+  subnetId: string;
+  canisterId: string;
+  methodName?: string;
+  
+  // Inter-canister call information
+  callHierarchy?: {
+    caller: string;
+    callee: string;
+    method: string;
+    cycleCost: bigint;
+    depth: number;
+  }[];
+  
+  // Performance metrics
+  executionTime: number; // microseconds
+  memoryUsage: number; // bytes
+  instructionCount: bigint;
+  
+  // Subnet information
+  subnetMetrics: {
+    uptime: number; // percentage (0-100)
+    responseTime: number; // milliseconds
+    throughput: number; // transactions per second
+    errorRate: number; // percentage (0-100)
+  };
+  
+  // Consensus information
+  consensusRound?: bigint;
+  certificateHash?: string;
+  
+  // Cycle balance information
+  cycleBalance?: {
+    before: bigint;
+    after: bigint;
+    burned: bigint;
+    refunded: bigint;
+  };
+}
+
+export interface ICPMetricsData extends MetricsData {
+  // Cycle-related metrics
+  cycleMetrics: {
+    totalCyclesUsed: bigint;
+    averageCyclePerTransaction: bigint;
+    cycleEfficiency: number; // cycles per instruction
+    cyclesBurned: bigint;
+    cyclesRefunded: bigint;
+    cycleCostTrend: number; // percentage change
+  };
+  
+  // Subnet performance tracking
+  subnetMetrics: {
+    [subnetId: string]: {
+      uptime: number; // percentage
+      averageResponseTime: number; // milliseconds
+      throughput: number; // transactions per second
+      errorRate: number; // percentage
+      consensusHealth: number; // percentage
+      lastUpdated: string;
+      nodeCount: number;
+      replicationFactor: number;
+    };
+  };
+  
+  // Canister health monitoring
+  canisterHealth: {
+    memoryUsage: number; // bytes
+    cycleBalance: bigint;
+    freezingThreshold: bigint;
+    status: 'running' | 'stopping' | 'stopped';
+    controllers: string[];
+    moduleHash?: string;
+    lastUpgrade?: string;
+    computeAllocation: number; // percentage
+    memoryAllocation: number; // bytes
+  };
+  
+  // Performance trends
+  performanceTrends: {
+    cycleUsageTrend: number; // percentage change
+    throughputTrend: number; // percentage change
+    errorRateTrend: number; // percentage change
+    responseTimeTrend: number; // percentage change
+    memoryUsageTrend: number; // percentage change
+  };
+  
+  // Network-wide statistics
+  networkStats: {
+    totalSubnets: number;
+    totalCanisters: number;
+    networkThroughput: number; // transactions per second
+    averageSubnetLoad: number; // percentage
+    networkUptime: number; // percentage
+  };
+}
+
+// Subnet-specific types
+export interface SubnetInfo {
+  id: string;
+  type: 'application' | 'system' | 'fiduciary' | 'verified_application';
+  nodeCount: number;
+  replicationFactor: number;
+  location: string[];
+  features: string[];
+  status: 'active' | 'degraded' | 'maintenance';
+}
+
+export interface SubnetHealthScore {
+  overall: number; // 0-100
+  uptime: number; // 0-100
+  performance: number; // 0-100
+  reliability: number; // 0-100
+  factors: {
+    responseTime: number;
+    throughput: number;
+    errorRate: number;
+    consensusHealth: number;
+    nodeHealth: number;
+  };
+  recommendations: string[];
+}
+
+// Inter-canister call tracking
+export interface CanisterCall {
+  id: string;
+  caller: string;
+  callee: string;
+  method: string;
+  timestamp: string;
+  cycleCost: bigint;
+  executionTime: number;
+  status: 'completed' | 'failed' | 'trapped';
+  errorMessage?: string;
+  depth: number;
+  parentCallId?: string;
+}
+
+// Cycle usage analytics
+export interface CycleUsageAnalytics {
+  totalUsage: bigint;
+  usageByMethod: Map<string, bigint>;
+  usageByCanister: Map<string, bigint>;
+  usageBySubnet: Map<string, bigint>;
+  efficiency: {
+    cyclesPerInstruction: number;
+    cyclesPerByte: number;
+    cyclesPerSecond: number;
+  };
+  trends: {
+    hourly: CycleDataPoint[];
+    daily: CycleDataPoint[];
+    weekly: CycleDataPoint[];
+  };
+  predictions: {
+    nextHour: bigint;
+    nextDay: bigint;
+    nextWeek: bigint;
+    confidence: number; // 0-1
+  };
+}
+
+export interface CycleDataPoint {
+  timestamp: string;
+  cycles: bigint;
+  transactions: number;
+  efficiency: number;
+}
+
+// Performance monitoring types
+export interface PerformanceMetrics {
+  responseTime: {
+    p50: number;
+    p90: number;
+    p95: number;
+    p99: number;
+    max: number;
+    min: number;
+  };
+  throughput: {
+    current: number;
+    average: number;
+    peak: number;
+    trend: number; // percentage change
+  };
+  errorRate: {
+    current: number;
+    average: number;
+    byType: Map<string, number>;
+    trend: number; // percentage change
+  };
+  resourceUsage: {
+    memory: number; // percentage
+    compute: number; // percentage
+    storage: number; // bytes
+    network: number; // bytes per second
+  };
+}
+
+// Enhanced chart data with ICP-specific metrics
+export interface ICPChartDataPoint extends ChartDataPoint {
+  cycles: bigint;
+  subnetHealth: number;
+  canisterCount: number;
+  networkThroughput: number;
+  consensusTime: number;
+  memoryUsage: number;
+}
+
+// ICP-specific constants
+export const ICP_SUBNET_TYPES = ['application', 'system', 'fiduciary', 'verified_application'] as const;
+export const ICP_CANISTER_STATUSES = ['running', 'stopping', 'stopped'] as const;
+export const ICP_CALL_STATUSES = ['completed', 'failed', 'trapped'] as const;
+
+export type SubnetType = typeof ICP_SUBNET_TYPES[number];
+export type CanisterStatus = typeof ICP_CANISTER_STATUSES[number];
+export type CallStatus = typeof ICP_CALL_STATUSES[number];
+
+// Enhanced Error Handling Types
+export type DashboardErrorType = 
+  | 'network'
+  | 'canister'
+  | 'validation'
+  | 'authentication'
+  | 'authorization'
+  | 'rate_limit'
+  | 'websocket'
+  | 'consensus'
+  | 'subnet'
+  | 'cycles'
+  | 'memory'
+  | 'unknown';
+
+export interface RecoveryAction {
+  type: 'retry' | 'refresh' | 'reconnect' | 'fallback' | 'contact_support';
+  label: string;
+  description: string;
+  action: () => Promise<void>;
+  priority: number;
+  automated: boolean;
+}
+
+export interface EnhancedDashboardError extends DashboardError {
+  type: DashboardErrorType;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  category: 'user' | 'system' | 'network' | 'blockchain';
+  
+  // ICP-specific error details
+  canisterError?: {
+    code: number;
+    message: string;
+    canisterId: string;
+    methodName?: string;
+    cyclesCost?: bigint;
+  };
+  
+  // Network error details
+  networkError?: {
+    statusCode?: number;
+    timeout: boolean;
+    retryable: boolean;
+    endpoint: string;
+    latency?: number;
+  };
+  
+  // WebSocket error details
+  websocketError?: {
+    code: number;
+    reason: string;
+    wasClean: boolean;
+    reconnectAttempt: number;
+  };
+  
+  // Context information
+  context: {
+    userId?: string;
+    sessionId: string;
+    canisterId?: string;
+    subnetId?: string;
+    timestamp: string;
+    userAgent: string;
+    url: string;
+    stackTrace?: string;
+    breadcrumbs?: string[];
+  };
+  
+  // Recovery information
+  recovery: {
+    suggested: boolean;
+    actions: RecoveryAction[];
+    autoRetry: boolean;
+    retryCount: number;
+    maxRetries: number;
+    nextRetryAt?: string;
+  };
+  
+  // Error analytics
+  analytics?: {
+    frequency: number; // How often this error occurs
+    impact: 'low' | 'medium' | 'high'; // Business impact
+    affectedUsers: number;
+    firstOccurrence: string;
+    lastOccurrence: string;
+  };
+}
+
+export interface ErrorContext {
+  component: string;
+  operation: string;
+  userId?: string;
+  canisterId?: string;
+  subnetId?: string;
+  additionalData?: Record<string, any>;
+}
+
+export interface ErrorStats {
+  totalErrors: number;
+  errorsByType: Map<DashboardErrorType, number>;
+  errorsBySeverity: Map<string, number>;
+  errorsByCategory: Map<string, number>;
+  averageResolutionTime: number;
+  recurringErrors: number;
+  criticalErrors: number;
+}
+
+export interface ErrorTrend {
+  timestamp: string;
+  errorCount: number;
+  errorType: DashboardErrorType;
+  severity: string;
+  resolved: boolean;
+}
+
+// Circuit Breaker Types
+export interface CircuitBreakerState {
+  state: 'closed' | 'open' | 'half-open';
+  failureCount: number;
+  failureThreshold: number;
+  timeout: number;
+  lastFailureTime: Date | null;
+  nextAttemptTime: Date | null;
+  successCount: number;
+  totalRequests: number;
+}
+
+export interface CircuitBreakerConfig {
+  failureThreshold: number;
+  timeout: number;
+  monitoringPeriod: number;
+  expectedErrors: DashboardErrorType[];
+  fallbackEnabled: boolean;
+}
+
+// Real-time update types
+export interface RealTimeUpdate<T = any> {
+  type: 'metrics' | 'transaction' | 'error' | 'status';
+  timestamp: string;
+  data: T;
+  metadata: {
+    source: 'websocket' | 'polling' | 'push';
+    version: string;
+    checksum?: string;
+    compressed?: boolean;
+    priority?: 'low' | 'normal' | 'high' | 'critical';
+  };
+}
+
+export interface ConnectionHealth {
+  websocketStatus: 'connected' | 'disconnected' | 'error' | 'connecting';
+  pollingStatus: 'active' | 'inactive' | 'error';
+  lastUpdate: Date | null;
+  updateFrequency: number;
+  dataFreshness: number;
+  errorCount: number;
+  reconnectCount: number;
+  quality: 'excellent' | 'good' | 'poor' | 'unstable';
+}
+
+// Notification types for real-time updates
+export interface DashboardNotification {
+  id: string;
+  type: 'success' | 'warning' | 'error' | 'info';
+  title: string;
+  message: string;
+  timestamp: string;
+  persistent: boolean;
+  actions?: NotificationAction[];
+  metadata?: {
+    source: string;
+    category: string;
+    priority: number;
+  };
+}
+
+export interface NotificationAction {
+  label: string;
+  action: () => void;
+  style: 'primary' | 'secondary' | 'danger';
+}
+
+export interface NotificationOptions {
+  duration?: number;
+  persistent?: boolean;
+  showProgress?: boolean;
+  actions?: NotificationAction[];
+  sound?: boolean;
+}
+
+export interface GlobalNotificationOptions {
+  position: NotificationPosition;
+  maxNotifications: number;
+  defaultDuration: number;
+  enableSounds: boolean;
+  enableAnimations: boolean;
+}
+
+export type NotificationPosition = 
+  | 'top-left' 
+  | 'top-right' 
+  | 'bottom-left' 
+  | 'bottom-right' 
+  | 'top-center' 
+  | 'bottom-center';
+
+// Enhanced error constants
+export const DASHBOARD_ERROR_TYPES = [
+  'network',
+  'canister', 
+  'validation',
+  'authentication',
+  'authorization',
+  'rate_limit',
+  'websocket',
+  'consensus',
+  'subnet',
+  'cycles',
+  'memory',
+  'unknown'
+] as const;
+
+export const ERROR_SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
+export const ERROR_CATEGORIES = ['user', 'system', 'network', 'blockchain'] as const;
+export const RECOVERY_ACTION_TYPES = ['retry', 'refresh', 'reconnect', 'fallback', 'contact_support'] as const;
