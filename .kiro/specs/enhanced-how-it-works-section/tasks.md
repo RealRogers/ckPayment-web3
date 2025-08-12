@@ -42,7 +42,7 @@
   - Create responsive grid layout with step information and code blocks
   - _Requirements: 3.1, 3.2, 3.4_
 
-- [ ] 8. Create enhanced code blocks with Card components
+- [x] 8. Create enhanced code blocks with Card components
   - Wrap code blocks in Card components with hover effects and proper borders
   - Add language labels in top-left corner of each code block
   - Implement copy button positioning in top-right corner with proper styling

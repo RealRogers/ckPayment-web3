@@ -275,19 +275,19 @@ const HowItWorksSection = () => {
                           </p>
                         </div>
 
-                        {/* Code block */}
-                        <div className="relative">
-                          <div className="absolute top-2 left-2 text-xs font-mono text-muted-foreground bg-background px-2 py-1 rounded z-10">
+                        {/* Enhanced code block with Card component */}
+                        <Card className="relative group hover:border-primary/30 hover:shadow-md transition-all duration-300 bg-card/50 backdrop-blur-sm">
+                          {/* Language label */}
+                          <div className="absolute top-3 left-3 text-xs font-mono text-muted-foreground bg-background/90 px-2 py-1 rounded border border-border/50 z-20">
                             {step.language}
                           </div>
-                          <pre className="p-4 pt-8 rounded-lg bg-muted/50 overflow-x-auto text-sm border border-border/30">
-                            <code>{step.code}</code>
-                          </pre>
-                          <div className="absolute top-2 right-2">
+                          
+                          {/* Copy button */}
+                          <div className="absolute top-3 right-3 z-20">
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 hover:bg-background/80 transition-colors"
+                              className="h-8 w-8 hover:bg-background/80 transition-colors opacity-70 group-hover:opacity-100"
                               onClick={() => copyCode(step.code, step.id)}
                             >
                               {copiedStep === step.id ? (
@@ -303,7 +303,12 @@ const HowItWorksSection = () => {
                               </div>
                             )}
                           </div>
-                        </div>
+                          
+                          {/* Code content */}
+                          <pre className="p-4 pt-10 pb-4 rounded-lg overflow-x-auto text-sm text-foreground/90 leading-relaxed">
+                            <code>{step.code}</code>
+                          </pre>
+                        </Card>
                       </div>
                     </div>
                   ))}
