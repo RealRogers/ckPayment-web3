@@ -217,7 +217,7 @@ ckPaymentSDK.initCryptoLink({
 
       {/* Quick Demo Modal */}
       <Dialog open={isQuickDemoOpen} onOpenChange={setIsQuickDemoOpen}>
-        <DialogContent className="sm:max-w-2xl">
+        <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center space-x-2">
               <CreditCard className="h-5 w-5 text-primary" />
@@ -228,9 +228,9 @@ ckPaymentSDK.initCryptoLink({
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-6">
+          <div className="space-y-6 p-1">
             {/* Demo Preview */}
-            <div className="bg-muted/30 rounded-lg p-6 border border-border/30">
+            <div className="bg-muted/30 rounded-lg p-3 sm:p-6 border border-border/30">
               <DemoEmbed type="crypto-link" />
             </div>
 
