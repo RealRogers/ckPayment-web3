@@ -242,14 +242,19 @@ const Navbar = () => {
               </Button>
             )}
 
-            {/* Mobile Menu Button */}
+            {/* Mobile Menu Button - Improved */}
             <button
-              className="md:hidden p-2 rounded-md text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              className="md:hidden p-3 -mr-2 rounded-full text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background transition-all duration-200"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label="Toggle menu"
+              aria-label={isMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
               aria-expanded={isMenuOpen}
+              aria-controls="mobile-menu"
             >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              <div className="relative w-6 h-6 flex items-center justify-center">
+                <span className={`absolute h-0.5 w-6 bg-current rounded-full transition-all duration-300 ${isMenuOpen ? 'rotate-45' : '-translate-y-1.5'}`}></span>
+                <span className={`absolute h-0.5 w-6 bg-current rounded-full transition-all duration-300 ${isMenuOpen ? 'opacity-0' : 'opacity-100'}`}></span>
+                <span className={`absolute h-0.5 w-6 bg-current rounded-full transition-all duration-300 ${isMenuOpen ? '-rotate-45' : 'translate-y-1.5'}`}></span>
+              </div>
             </button>
 
             {/* CTA Button - Hidden on mobile when menu is open */}
@@ -264,13 +269,14 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div
-          ref={menuRef}
-          className="fixed inset-0 top-16 bg-background z-40 p-4 md:hidden animate-in fade-in duration-200"
-        >
-          <div className="flex flex-col space-y-4">
+      {/* Mobile Menu - Improved */}
+      <div
+        ref={menuRef}
+        className={`fixed inset-0 top-16 z-40 md:hidden overflow-y-auto transition-all duration-300 ease-in-out transform ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        id="mobile-menu"
+      >
+        <div className="bg-background/95 backdrop-blur-sm p-6 h-full overflow-y-auto">
+          <div className="flex flex-col space-y-3 py-2">
             {navItems.map((item) => {
               const isActive = location.pathname === '/' && activeSection === item.id;
 
@@ -282,18 +288,18 @@ const Navbar = () => {
                   <div key={item.id} className="space-y-2">
                     <button
                       onClick={() => scrollToSection(item.id)}
-                      className={`py-3 px-4 text-left hover:bg-muted rounded-md transition-colors w-full ${isActive || isCurrentPage ? 'text-primary bg-muted/50' : 'text-foreground'
-                        }`}
-                      aria-label={`Go to ${item.label}`}
+                      className={`py-4 px-5 text-left hover:bg-muted/80 active:bg-muted/60 rounded-lg transition-all w-full text-base flex items-center justify-between ${isActive || isCurrentPage ? 'text-primary bg-muted/50 font-medium' : 'text-foreground'}`}
+                      aria-label={`Ir a ${item.label}`}
                     >
-                      {item.label}
+                      <span>{item.label}</span>
+                      {isActive && <div className="w-2 h-2 rounded-full bg-primary"></div>}
                     </button>
                     <Link
                       to={`/${item.id}`}
-                      className="py-2 px-6 text-left hover:bg-muted rounded-md transition-colors text-muted-foreground text-sm flex items-center space-x-2"
+                      className="py-3 px-6 -mt-2 mb-2 text-left hover:bg-muted/50 rounded-lg transition-colors text-muted-foreground text-sm flex items-center space-x-2"
                     >
-                      <span>View Detailed {item.label}</span>
-                      <ExternalLink className="h-3 w-3" />
+                      <span>Ver más sobre {item.label}</span>
+                      <ExternalLink className="h-3.5 w-3.5" />
                     </Link>
                   </div>
                 );
@@ -303,36 +309,43 @@ const Navbar = () => {
                 <button
                   key={item.id}
                   onClick={() => scrollToSection(item.id)}
-                  className={`py-3 px-4 text-left hover:bg-muted rounded-md transition-colors flex items-center space-x-2 ${isActive ? 'text-primary bg-muted/50' : 'text-foreground'
-                    }`}
-                  aria-label={`Go to ${item.label}`}
+                  className={`py-4 px-5 text-left hover:bg-muted/80 active:bg-muted/60 rounded-lg transition-all w-full text-base flex items-center justify-between ${isActive ? 'text-primary bg-muted/50 font-medium' : 'text-foreground'}`}
+                  aria-label={`Ir a ${item.label}`}
                 >
                   <span>{item.label}</span>
-                  {item.external && <ExternalLink className="h-3 w-3" />}
+                  <div className="flex items-center space-x-2">
+                    {isActive && <div className="w-2 h-2 rounded-full bg-primary"></div>}
+                    {item.external && <ExternalLink className="h-3.5 w-3.5 opacity-70" />}
+                  </div>
                 </button>
               );
             })}
-            {/* Test Wallet Button for Mobile */}
-            <Button
-              variant="outline"
-              className="mt-4 w-full border-primary/30 hover:border-primary/50 text-primary hover:bg-primary hover:text-white transition-all duration-300"
-              onClick={handleIIConnect}
-              aria-label="Test wallet connection with Internet Identity"
-            >
-              <Wallet className="mr-2 h-4 w-4" />
-              Test Wallet
-            </Button>
+            {/* Test Wallet Button for Mobile - Improved */}
+            <div className="mt-6 pt-4 border-t border-border/50 space-y-3">
+              <Button
+                variant="outline"
+                className="w-full py-5 text-base border-primary/30 hover:border-primary/50 text-primary hover:bg-primary/5 hover:text-primary transition-all duration-300"
+                onClick={handleIIConnect}
+                aria-label="Conectar billetera con Internet Identity"
+              >
+                <Wallet className="mr-2 h-5 w-5" />
+                Conectar Billetera
+              </Button>
 
-            <Button
-              className="mt-2 w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-glow-soft hover:shadow-glow-primary transition-all duration-300"
-              onClick={() => scrollToSection('get-started')}
-              aria-label="Get started with ckPayment"
-            >
-              Get Started
-            </Button>
+              <Button
+                className="w-full py-5 text-base bg-primary hover:bg-primary/90 text-primary-foreground shadow-glow-soft hover:shadow-glow-primary transition-all duration-300"
+                onClick={() => {
+                  scrollToSection('get-started');
+                  setIsMenuOpen(false);
+                }}
+                aria-label="Comenzar con ckPayment"
+              >
+                Comenzar Ahora
+              </Button>
+            </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Wallet Connection Modal */}
       <Dialog open={isWalletModalOpen} onOpenChange={setIsWalletModalOpen}>
