@@ -217,47 +217,96 @@ const HowItWorksSection = () => {
 
           {Object.entries(integrations).map(([key, integration]) => (
             <TabsContent key={key} value={key}>
-              <div className="space-y-6">
-                {integration.steps.map((step) => (
-                  <div key={step.id} className="relative group">
-                    <div className="mb-2">
-                      <h3 className="text-lg font-semibold text-foreground">
-                        {step.number}. {step.title}
-                      </h3>
-                      <p className="text-muted-foreground text-sm">
-                        {step.description}
-                      </p>
-                    </div>
-                    <div className="relative">
-                      <div className="absolute top-2 left-2 text-xs font-mono text-muted-foreground bg-background px-2 py-1 rounded">
-                        {step.language}
-                      </div>
-                      <pre className="p-4 pt-8 rounded-lg bg-muted/50 overflow-x-auto text-sm">
-                        <code>{step.code}</code>
-                      </pre>
-                      <div className="absolute top-2 right-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 hover:bg-background/80 transition-colors"
-                          onClick={() => copyCode(step.code, step.id)}
-                        >
-                          {copiedStep === step.id ? (
-                            <Check className="h-4 w-4 text-green-500" />
-                          ) : (
-                            <Copy className="h-4 w-4" />
-                          )}
-                        </Button>
-                        {showCopiedPopup === step.id && (
-                          <div className="absolute -top-8 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded shadow-lg animate-in fade-in-0 zoom-in-95 duration-200">
-                            Copied!
-                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-2 border-r-2 border-t-2 border-transparent border-t-green-500"></div>
-                          </div>
-                        )}
-                      </div>
+              <div className="space-y-8">
+                {/* Per-tab header with comprehensive information */}
+                <div className="text-center space-y-4 pb-6 border-b border-border/30">
+                  <div className="flex justify-center">
+                    <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+                      <integration.icon className="h-8 w-8 text-primary" />
                     </div>
                   </div>
-                ))}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-center gap-3">
+                      <h3 className="text-2xl font-bold text-foreground">{integration.title}</h3>
+                      <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                        {integration.badge}
+                      </Badge>
+                    </div>
+                    <p className="text-muted-foreground max-w-2xl mx-auto">
+                      {integration.description}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <Zap className="h-4 w-4" />
+                      <span>{integration.difficulty}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4" />
+                      <span>{integration.time}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Timeline-based step layout */}
+                <div className="relative">
+                  {integration.steps.map((step, index) => (
+                    <div key={step.id} className="relative flex gap-6 pb-8 last:pb-0">
+                      {/* Timeline circle and line */}
+                      <div className="flex flex-col items-center">
+                        <div className="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center font-semibold text-sm z-10">
+                          {step.number}
+                        </div>
+                        {/* Connecting line - only show if not the last step */}
+                        {index < integration.steps.length - 1 && (
+                          <div className="w-0.5 h-full bg-border/30 mt-2 absolute top-10"></div>
+                        )}
+                      </div>
+
+                      {/* Step content grid */}
+                      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                        {/* Step information */}
+                        <div className="space-y-2">
+                          <h3 className="text-lg font-semibold text-foreground">
+                            {step.title}
+                          </h3>
+                          <p className="text-muted-foreground text-sm">
+                            {step.description}
+                          </p>
+                        </div>
+
+                        {/* Code block */}
+                        <div className="relative">
+                          <div className="absolute top-2 left-2 text-xs font-mono text-muted-foreground bg-background px-2 py-1 rounded z-10">
+                            {step.language}
+                          </div>
+                          <pre className="p-4 pt-8 rounded-lg bg-muted/50 overflow-x-auto text-sm border border-border/30">
+                            <code>{step.code}</code>
+                          </pre>
+                          <div className="absolute top-2 right-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 hover:bg-background/80 transition-colors"
+                              onClick={() => copyCode(step.code, step.id)}
+                            >
+                              {copiedStep === step.id ? (
+                                <Check className="h-4 w-4 text-green-500" />
+                              ) : (
+                                <Copy className="h-4 w-4" />
+                              )}
+                            </Button>
+                            {showCopiedPopup === step.id && (
+                              <div className="absolute -top-8 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded shadow-lg animate-in fade-in-0 zoom-in-95 duration-200">
+                                Copied!
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-2 border-r-2 border-t-2 border-transparent border-t-green-500"></div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
               </div>
             </TabsContent>
           ))}
