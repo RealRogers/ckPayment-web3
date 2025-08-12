@@ -1078,6 +1078,93 @@ ckPayment.createCheckout({
           </Card>
         </div>
       </section>
+
+      {/* Interactive Demo Section */}
+      <section className="py-20 bg-gradient-to-br from-blue-500/5 via-background to-cyan-500/5 relative z-10">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <Badge className="mb-4 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 text-blue-600 border-blue-500/20">
+              <Play className="h-3 w-3 mr-1" />
+              Interactive Demo
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Try ckPayment{" "}
+              <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                Right Now
+              </span>
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+              Experience our complete e-commerce integration with this fully functional demo. 
+              Add products to cart and simulate a real ckPayment checkout flow.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
+              <Button 
+                size="lg" 
+                className="px-8 py-4 text-lg font-medium group bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
+                onClick={() => navigate('/ckpayment-demo')}
+              >
+                <ExternalLink className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
+                Open Full Demo
+              </Button>
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="px-8 py-4 text-lg font-medium group border-blue-500/30 text-blue-600 hover:bg-blue-500/10"
+                onClick={() => {
+                  const demoSection = document.getElementById('embedded-demo');
+                  if (demoSection) {
+                    demoSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+              >
+                <ArrowRight className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
+                Try Below
+              </Button>
+            </div>
+          </div>
+
+          {/* Embedded Demo */}
+          <div id="embedded-demo" className="max-w-6xl mx-auto">
+            <Card className="p-8 bg-card/80 backdrop-blur-sm border border-blue-500/20">
+              <div className="mb-6 text-center">
+                <Badge variant="outline" className="border-blue-500/30 text-blue-600 bg-blue-500/5">
+                  <Code className="h-3 w-3 mr-1" />
+                  Live Demo - Fork This Code
+                </Badge>
+              </div>
+              
+              {/* Demo Component will be imported here */}
+              <div className="rounded-xl overflow-hidden border border-blue-500/20 bg-background/50">
+                {/* Placeholder for now - will be replaced with actual demo */}
+                <div className="p-8 text-center">
+                  <div className="w-16 h-16 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
+                  <p className="text-muted-foreground mb-4">Loading Interactive Demo...</p>
+                  <p className="text-sm text-blue-600">
+                    The full ckPayment e-commerce demo will load here
+                  </p>
+                </div>
+              </div>
+              
+              <div className="mt-6 flex flex-wrap justify-center gap-4">
+                <Button variant="outline" size="sm" className="border-blue-500/30 text-blue-600 hover:bg-blue-500/10">
+                  <Github className="h-4 w-4 mr-2" />
+                  Fork on GitHub
+                </Button>
+                <Button variant="outline" size="sm" className="border-cyan-500/30 text-cyan-600 hover:bg-cyan-500/10">
+                  <Download className="h-4 w-4 mr-2" />
+                  Download Code
+                </Button>
+                <Button variant="outline" size="sm" className="border-blue-600/30 text-blue-700 hover:bg-blue-600/10">
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Integration Guide
+                </Button>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 };

@@ -4,9 +4,9 @@
   "description": "Enhanced ICP Dashboard with Real-time Features",
   "main": "src/index.tsx",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "eject": "react-scripts eject",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -17,8 +17,7 @@
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "type-check": "tsc --noEmit",
-    "analyze": "npm run build && npx bundle-analyzer build/static/js/*.js",
-    "serve": "serve -s build"
+    "analyze": "npm run build && npx bundle-analyzer dist/assets/*.js"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.11",
@@ -76,6 +75,7 @@
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
+    "@vitejs/plugin-react": "^5.0.0",
     "@vitejs/plugin-react-swc": "^4.0.0",
     "babel-jest": "^29.7.0",
     "eslint": "^8.49.0",
@@ -87,10 +87,10 @@
     "jest-environment-jsdom": "^29.7.0",
     "jest-html-reporters": "^3.1.5",
     "jest-watch-typeahead": "^2.2.2",
-    "lovable-tagger": "^1.1.9",
+
     "serve": "^14.2.1",
     "ts-jest": "^29.1.1",
-    "vite": "^7.1.1"
+    "vite": "^7.1.2"
   },
   "browserslist": {
     "production": [

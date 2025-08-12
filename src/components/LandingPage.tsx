@@ -124,7 +124,7 @@ const LandingPage = () => {
             <SolutionSection />
           </div>
         </div>
-        <div className="relative py-12 md:py-16">
+        <div id="integration-hub" className="relative py-12 md:py-16 scroll-mt-20">
           <div className="relative z-20">
             <IntegrationHub />
           </div>

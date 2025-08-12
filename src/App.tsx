@@ -16,6 +16,8 @@ import Education from "./pages/Education";
 import CreatorEconomy from "./pages/CreatorEconomy";
 import ProfileManagement from "./pages/ProfileManagement";
 import Dashboard from "./pages/Dashboard";
+import CkPaymentDemo from "./pages/CkPaymentDemo";
+import TestDemo from "./pages/TestDemo";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +43,8 @@ const App = () => (
           <Route path="/profile-management" element={<ProfileManagement />} />
           <Route path="/ProfileManagement" element={<ProfileManagement />} />
           <Route path="/dashboard-preview" element={<Dashboard />} />
+          <Route path="/ckpayment-demo" element={<CkPaymentDemo />} />
+          <Route path="/test-demo" element={<TestDemo />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
