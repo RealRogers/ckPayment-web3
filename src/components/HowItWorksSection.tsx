@@ -166,29 +166,37 @@ const HowItWorksSection = () => {
   };
 
   return (
-    <section id="how-it-works" className="py-16 md:py-24 bg-gradient-to-b from-background to-muted/5">
+    <section 
+      id="how-it-works" 
+      className="py-16 md:py-24 bg-gradient-to-b from-background to-muted/5"
+      aria-labelledby="how-it-works-title"
+    >
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto text-center mb-16">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
-            <Code className="h-4 w-4" />
+            <Code className="h-4 w-4" aria-hidden="true" />
             How It Works
           </div>
-          <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-6">
+          <h2 
+            id="how-it-works-title"
+            className="text-3xl md:text-5xl font-bold text-foreground mb-6"
+          >
             Simple Integration,{" "}
             <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               Powerful Results
             </span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-6">
+          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-6">
             Get started with ckPayment in minutes using our intuitive APIs and SDKs.
             Choose your preferred integration method and start accepting payments today.
           </p>
           <Button 
             variant="outline" 
-            className="border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/50"
+            className="border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/50 focus:ring-2 focus:ring-primary/50 focus:outline-none"
             onClick={() => window.open('https://docs.ckpayment.xyz', '_blank')}
+            aria-label="View documentation in new tab"
           >
-            <ArrowRight className="mr-2 h-4 w-4" />
+            <ArrowRight className="mr-2 h-4 w-4" aria-hidden="true" />
             View Documentation
           </Button>
         </div>
@@ -198,87 +206,120 @@ const HowItWorksSection = () => {
           onValueChange={(v) => setActiveTab(v as IntegrationType)}
           className="max-w-4xl mx-auto"
           defaultValue="web"
+          aria-label="Integration methods"
         >
-          <TabsList className="grid w-full grid-cols-3 mb-8 h-auto">
+          <TabsList 
+            className="grid w-full grid-cols-1 sm:grid-cols-3 mb-8 h-auto gap-2 sm:gap-0 bg-muted/50 p-1"
+            role="tablist"
+            aria-label="Choose integration method"
+          >
             {Object.entries(integrations).map(([key, integration]) => {
               const IconComponent = integration.icon;
               return (
                 <TabsTrigger 
                   key={key} 
                   value={key}
-                  className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 p-3 sm:p-4 h-auto"
+                  className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 p-3 sm:p-4 h-auto min-h-[60px] sm:min-h-[80px] focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all duration-200"
+                  role="tab"
+                  aria-selected={activeTab === key}
+                  aria-controls={`${key}-panel`}
+                  id={`${key}-tab`}
                 >
-                  <IconComponent className="h-4 w-4" />
-                  <span className="text-xs sm:text-sm font-medium">{integration.title}</span>
+                  <IconComponent className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+                  <span className="text-xs sm:text-sm font-medium text-center">{integration.title}</span>
                 </TabsTrigger>
               );
             })}
           </TabsList>
 
           {Object.entries(integrations).map(([key, integration]) => (
-            <TabsContent key={key} value={key}>
+            <TabsContent 
+              key={key} 
+              value={key}
+              role="tabpanel"
+              aria-labelledby={`${key}-tab`}
+              id={`${key}-panel`}
+              tabIndex={0}
+            >
               <div className="space-y-8">
                 {/* Per-tab header with comprehensive information */}
                 <div className="text-center space-y-4 pb-6 border-b border-border/30">
                   <div className="flex justify-center">
-                    <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-                      <integration.icon className="h-8 w-8 text-primary" />
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-primary/10 flex items-center justify-center">
+                      <integration.icon className="h-8 w-8 sm:h-10 sm:w-10 text-primary" aria-hidden="true" />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <div className="flex items-center justify-center gap-3">
-                      <h3 className="text-2xl font-bold text-foreground">{integration.title}</h3>
-                      <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
+                      <h3 className="text-xl sm:text-2xl font-bold text-foreground">{integration.title}</h3>
+                      <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-xs sm:text-sm">
                         {integration.badge}
                       </Badge>
                     </div>
-                    <p className="text-muted-foreground max-w-2xl mx-auto">
+                    <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto px-4">
                       {integration.description}
                     </p>
                   </div>
-                  <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
-                      <Zap className="h-4 w-4" />
-                      <span>{integration.difficulty}</span>
+                      <Zap className="h-4 w-4" aria-hidden="true" />
+                      <span>Difficulty: {integration.difficulty}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4" />
-                      <span>{integration.time}</span>
+                      <CheckCircle className="h-4 w-4" aria-hidden="true" />
+                      <span>Setup time: {integration.time}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Timeline-based step layout */}
-                <div className="relative">
+                <div className="relative" role="list" aria-label={`${integration.title} integration steps`}>
                   {integration.steps.map((step, index) => (
-                    <div key={step.id} className="relative flex gap-6 pb-8 last:pb-0">
+                    <div 
+                      key={step.id} 
+                      className="relative flex gap-4 sm:gap-6 pb-8 last:pb-0"
+                      role="listitem"
+                    >
                       {/* Timeline circle and line */}
-                      <div className="flex flex-col items-center">
-                        <div className="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center font-semibold text-sm z-10">
+                      <div className="flex flex-col items-center flex-shrink-0">
+                        <div 
+                          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-green-500 text-white flex items-center justify-center font-semibold text-sm sm:text-base z-10 shadow-lg"
+                          aria-label={`Step ${step.number}`}
+                        >
                           {step.number}
                         </div>
                         {/* Connecting line - only show if not the last step */}
                         {index < integration.steps.length - 1 && (
-                          <div className="w-0.5 h-full bg-border/30 mt-2 absolute top-10"></div>
+                          <div 
+                            className="w-0.5 bg-border/30 mt-2 absolute z-0"
+                            style={{ 
+                              height: 'calc(100% - 2.5rem)',
+                              top: '3rem'
+                            }}
+                            aria-hidden="true"
+                          ></div>
                         )}
                       </div>
 
                       {/* Step content grid */}
-                      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 items-start min-w-0">
                         {/* Step information */}
-                        <div className="space-y-2">
-                          <h3 className="text-lg font-semibold text-foreground">
+                        <div className="space-y-2 min-w-0">
+                          <h4 className="text-base sm:text-lg font-semibold text-foreground">
                             {step.title}
-                          </h3>
-                          <p className="text-muted-foreground text-sm">
+                          </h4>
+                          <p className="text-muted-foreground text-sm sm:text-base">
                             {step.description}
                           </p>
                         </div>
 
                         {/* Enhanced code block with Card component */}
-                        <Card className="relative group hover:border-primary/30 hover:shadow-md transition-all duration-300 bg-card/50 backdrop-blur-sm">
+                        <Card className="relative group hover:border-primary/30 hover:shadow-md transition-all duration-300 bg-card/50 backdrop-blur-sm min-w-0">
                           {/* Language label */}
-                          <div className="absolute top-3 left-3 text-xs font-mono text-muted-foreground bg-background/90 px-2 py-1 rounded border border-border/50 z-20">
+                          <div 
+                            className="absolute top-3 left-3 text-xs font-mono text-muted-foreground bg-background/90 px-2 py-1 rounded border border-border/50 z-20"
+                            aria-label={`Code language: ${step.language}`}
+                          >
                             {step.language}
                           </div>
                           
@@ -287,17 +328,22 @@ const HowItWorksSection = () => {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 hover:bg-background/80 transition-colors opacity-70 group-hover:opacity-100"
+                              className="h-8 w-8 hover:bg-background/80 transition-colors opacity-70 group-hover:opacity-100 focus:ring-2 focus:ring-primary/50 focus:outline-none"
                               onClick={() => copyCode(step.code, step.id)}
+                              aria-label={`Copy ${step.language} code for ${step.title}`}
                             >
                               {copiedStep === step.id ? (
-                                <Check className="h-4 w-4 text-green-500" />
+                                <Check className="h-4 w-4 text-green-500" aria-hidden="true" />
                               ) : (
-                                <Copy className="h-4 w-4" />
+                                <Copy className="h-4 w-4" aria-hidden="true" />
                               )}
                             </Button>
                             {showCopiedPopup === step.id && (
-                              <div className="absolute -top-8 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded shadow-lg animate-in fade-in-0 zoom-in-95 duration-200">
+                              <div 
+                                className="absolute -top-8 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded shadow-lg animate-in fade-in-0 zoom-in-95 duration-200"
+                                role="status"
+                                aria-live="polite"
+                              >
                                 Copied!
                                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-2 border-r-2 border-t-2 border-transparent border-t-green-500"></div>
                               </div>
@@ -305,13 +351,50 @@ const HowItWorksSection = () => {
                           </div>
                           
                           {/* Code content */}
-                          <pre className="p-4 pt-10 pb-4 rounded-lg overflow-x-auto text-sm text-foreground/90 leading-relaxed">
+                          <pre 
+                            className="p-4 pt-10 pb-4 rounded-lg overflow-x-auto text-xs sm:text-sm text-foreground/90 leading-relaxed"
+                            tabIndex={0}
+                            role="region"
+                            aria-label={`${step.language} code example for ${step.title}`}
+                          >
                             <code>{step.code}</code>
                           </pre>
                         </Card>
                       </div>
                     </div>
                   ))}
+                </div>
+
+                {/* Features section */}
+                <div className="mt-8 pt-6 border-t border-border/30">
+                  <div className="bg-muted/30 rounded-lg p-4 sm:p-6">
+                    <h4 
+                      className="text-sm sm:text-base font-semibold text-foreground mb-4 text-center"
+                      id={`${key}-features-title`}
+                    >
+                      Key Features
+                    </h4>
+                    <div 
+                      className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-3 sm:gap-4 lg:gap-6"
+                      role="list"
+                      aria-labelledby={`${key}-features-title`}
+                    >
+                      {integration.features.map((feature, index) => (
+                        <div 
+                          key={index} 
+                          className="flex items-center gap-2 text-sm sm:text-base text-muted-foreground justify-center sm:justify-start"
+                          role="listitem"
+                        >
+                          <CheckCircle 
+                            className="h-4 w-4 text-green-500 flex-shrink-0" 
+                            aria-hidden="true"
+                          />
+                          <span>{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
             </TabsContent>
           ))}
