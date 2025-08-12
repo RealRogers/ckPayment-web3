@@ -166,19 +166,31 @@ const HowItWorksSection = () => {
   };
 
   return (
-    <section id="how-it-works" className="py-20 bg-background">
+    <section id="how-it-works" className="py-16 md:py-24 bg-gradient-to-b from-background to-muted/5">
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto text-center mb-16">
-          <Badge variant="outline" className="mb-4 bg-primary/10 text-primary border-primary/20">
-            <Terminal className="h-4 w-4 mr-2" /> Developer Friendly
-          </Badge>
-          <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4">
-            Simple Integration, 
-            <span className="bg-gradient-primary bg-clip-text text-transparent"> Powerful Results</span>
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
+            <Code className="h-4 w-4" />
+            How It Works
+          </div>
+          <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-6">
+            Simple Integration,{" "}
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Powerful Results
+            </span>
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Get started with ckPayment in minutes using our intuitive APIs and SDKs
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-6">
+            Get started with ckPayment in minutes using our intuitive APIs and SDKs.
+            Choose your preferred integration method and start accepting payments today.
           </p>
+          <Button 
+            variant="outline" 
+            className="border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/50"
+            onClick={() => window.open('https://docs.ckpayment.xyz', '_blank')}
+          >
+            <ArrowRight className="mr-2 h-4 w-4" />
+            View Documentation
+          </Button>
         </div>
 
         <Tabs 
@@ -187,16 +199,20 @@ const HowItWorksSection = () => {
           className="max-w-4xl mx-auto"
           defaultValue="web"
         >
-          <TabsList className="grid w-full grid-cols-3 mb-8">
-            <TabsTrigger value="web" className="flex items-center">
-              <integrations.web.icon className="h-4 w-4 mr-2" /> Web
-            </TabsTrigger>
-            <TabsTrigger value="mobile" className="flex items-center">
-              <integrations.mobile.icon className="h-4 w-4 mr-2" /> Mobile
-            </TabsTrigger>
-            <TabsTrigger value="api" className="flex items-center">
-              <integrations.api.icon className="h-4 w-4 mr-2" /> API
-            </TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 mb-8 h-auto">
+            {Object.entries(integrations).map(([key, integration]) => {
+              const IconComponent = integration.icon;
+              return (
+                <TabsTrigger 
+                  key={key} 
+                  value={key}
+                  className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 p-3 sm:p-4 h-auto"
+                >
+                  <IconComponent className="h-4 w-4" />
+                  <span className="text-xs sm:text-sm font-medium">{integration.title}</span>
+                </TabsTrigger>
+              );
+            })}
           </TabsList>
 
           {Object.entries(integrations).map(([key, integration]) => (
