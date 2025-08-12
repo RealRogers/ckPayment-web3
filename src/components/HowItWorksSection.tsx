@@ -168,12 +168,17 @@ const HowItWorksSection = () => {
   return (
     <section 
       id="how-it-works" 
-      className="py-16 md:py-24 bg-gradient-to-b from-background to-muted/5"
+      className="py-16 md:py-24 bg-gradient-to-b from-background via-background/95 to-muted/10 relative overflow-hidden"
       aria-labelledby="how-it-works-title"
     >
-      <div className="container mx-auto px-4">
+      {/* Background decoration */}
+      <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 pointer-events-none" />
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl opacity-20 pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl opacity-20 pointer-events-none" />
+      
+      <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-6xl mx-auto text-center mb-16">
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary/15 to-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6 border border-primary/20 shadow-sm hover:shadow-md transition-all duration-300">
             <Code className="h-4 w-4" aria-hidden="true" />
             How It Works
           </div>
@@ -192,11 +197,11 @@ const HowItWorksSection = () => {
           </p>
           <Button 
             variant="outline" 
-            className="border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/50 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+            className="border-primary/30 text-primary hover:bg-gradient-to-r hover:from-primary/10 hover:to-primary/5 hover:border-primary/50 hover:shadow-lg hover:scale-105 focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all duration-300 group"
             onClick={() => window.open('https://docs.ckpayment.xyz', '_blank')}
             aria-label="View documentation in new tab"
           >
-            <ArrowRight className="mr-2 h-4 w-4" aria-hidden="true" />
+            <ArrowRight className="mr-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" aria-hidden="true" />
             View Documentation
           </Button>
         </div>
@@ -209,23 +214,30 @@ const HowItWorksSection = () => {
           aria-label="Integration methods"
         >
           <TabsList 
-            className="grid w-full grid-cols-1 sm:grid-cols-3 mb-8 h-auto gap-2 sm:gap-0 bg-muted/50 p-1"
+            className="grid w-full grid-cols-1 sm:grid-cols-3 mb-8 h-auto gap-2 sm:gap-0 bg-gradient-to-r from-muted/60 via-muted/50 to-muted/60 p-1 rounded-xl border border-border/50 shadow-sm backdrop-blur-sm"
             role="tablist"
             aria-label="Choose integration method"
           >
             {Object.entries(integrations).map(([key, integration]) => {
               const IconComponent = integration.icon;
+              const isActive = activeTab === key;
               return (
                 <TabsTrigger 
                   key={key} 
                   value={key}
-                  className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 p-3 sm:p-4 h-auto min-h-[60px] sm:min-h-[80px] focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all duration-200"
+                  className={`flex flex-col sm:flex-row items-center gap-1 sm:gap-2 p-3 sm:p-4 h-auto min-h-[60px] sm:min-h-[80px] focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all duration-300 rounded-lg group ${
+                    isActive 
+                      ? 'bg-gradient-to-r from-primary/15 to-primary/10 text-primary border border-primary/20 shadow-md' 
+                      : 'hover:bg-gradient-to-r hover:from-muted/80 hover:to-muted/60 hover:shadow-sm'
+                  }`}
                   role="tab"
                   aria-selected={activeTab === key}
                   aria-controls={`${key}-panel`}
                   id={`${key}-tab`}
                 >
-                  <IconComponent className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+                  <IconComponent className={`h-4 w-4 sm:h-5 sm:w-5 transition-all duration-300 ${
+                    isActive ? 'text-primary scale-110' : 'group-hover:scale-105'
+                  }`} aria-hidden="true" />
                   <span className="text-xs sm:text-sm font-medium text-center">{integration.title}</span>
                 </TabsTrigger>
               );
@@ -243,30 +255,30 @@ const HowItWorksSection = () => {
             >
               <div className="space-y-8">
                 {/* Per-tab header with comprehensive information */}
-                <div className="text-center space-y-4 pb-6 border-b border-border/30">
+                <div className="text-center space-y-4 pb-6 border-b border-gradient-to-r from-transparent via-border/50 to-transparent relative">
                   <div className="flex justify-center">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-primary/10 flex items-center justify-center">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 flex items-center justify-center shadow-lg border border-primary/20 hover:shadow-xl hover:scale-105 transition-all duration-300">
                       <integration.icon className="h-8 w-8 sm:h-10 sm:w-10 text-primary" aria-hidden="true" />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
                       <h3 className="text-xl sm:text-2xl font-bold text-foreground">{integration.title}</h3>
-                      <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-xs sm:text-sm">
+                      <Badge variant="secondary" className="bg-gradient-to-r from-primary/15 to-primary/10 text-primary border-primary/20 text-xs sm:text-sm shadow-sm hover:shadow-md transition-all duration-300">
                         {integration.badge}
                       </Badge>
                     </div>
-                    <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto px-4">
+                    <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto px-4 leading-relaxed">
                       {integration.description}
                     </p>
                   </div>
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <Zap className="h-4 w-4" aria-hidden="true" />
+                    <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-muted/30 border border-border/30">
+                      <Zap className="h-4 w-4 text-yellow-500" aria-hidden="true" />
                       <span>Difficulty: {integration.difficulty}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4" aria-hidden="true" />
+                    <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-muted/30 border border-border/30">
+                      <CheckCircle className="h-4 w-4 text-green-500" aria-hidden="true" />
                       <span>Setup time: {integration.time}</span>
                     </div>
                   </div>
@@ -283,7 +295,7 @@ const HowItWorksSection = () => {
                       {/* Timeline circle and line */}
                       <div className="flex flex-col items-center flex-shrink-0">
                         <div 
-                          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-green-500 text-white flex items-center justify-center font-semibold text-sm sm:text-base z-10 shadow-lg"
+                          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 text-white flex items-center justify-center font-semibold text-sm sm:text-base z-10 shadow-lg border-2 border-green-300/50 hover:shadow-xl hover:scale-110 transition-all duration-300"
                           aria-label={`Step ${step.number}`}
                         >
                           {step.number}
@@ -291,7 +303,7 @@ const HowItWorksSection = () => {
                         {/* Connecting line - only show if not the last step */}
                         {index < integration.steps.length - 1 && (
                           <div 
-                            className="w-0.5 bg-border/30 mt-2 absolute z-0"
+                            className="w-0.5 bg-gradient-to-b from-green-300/50 via-border/30 to-green-300/50 mt-2 absolute z-0"
                             style={{ 
                               height: 'calc(100% - 2.5rem)',
                               top: '3rem'
@@ -314,10 +326,10 @@ const HowItWorksSection = () => {
                         </div>
 
                         {/* Enhanced code block with Card component */}
-                        <Card className="relative group hover:border-primary/30 hover:shadow-md transition-all duration-300 bg-card/50 backdrop-blur-sm min-w-0">
+                        <Card className="relative group hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300 bg-gradient-to-br from-card/80 via-card/60 to-card/80 backdrop-blur-sm border border-border/50 min-w-0">
                           {/* Language label */}
                           <div 
-                            className="absolute top-3 left-3 text-xs font-mono text-muted-foreground bg-background/90 px-2 py-1 rounded border border-border/50 z-20"
+                            className="absolute top-3 left-3 text-xs font-mono text-muted-foreground bg-gradient-to-r from-background/95 to-background/90 px-2 py-1 rounded border border-border/50 z-20 shadow-sm"
                             aria-label={`Code language: ${step.language}`}
                           >
                             {step.language}
@@ -328,7 +340,7 @@ const HowItWorksSection = () => {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 hover:bg-background/80 transition-colors opacity-70 group-hover:opacity-100 focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                              className="h-8 w-8 hover:bg-gradient-to-r hover:from-primary/20 hover:to-primary/10 hover:scale-110 transition-all duration-300 opacity-70 group-hover:opacity-100 focus:ring-2 focus:ring-primary/50 focus:outline-none shadow-sm"
                               onClick={() => copyCode(step.code, step.id)}
                               aria-label={`Copy ${step.language} code for ${step.title}`}
                             >
@@ -340,7 +352,7 @@ const HowItWorksSection = () => {
                             </Button>
                             {showCopiedPopup === step.id && (
                               <div 
-                                className="absolute -top-8 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded shadow-lg animate-in fade-in-0 zoom-in-95 duration-200"
+                                className="absolute -top-8 -right-2 bg-gradient-to-r from-green-500 to-green-600 text-white text-xs px-2 py-1 rounded shadow-xl animate-in fade-in-0 zoom-in-95 duration-200 border border-green-400"
                                 role="status"
                                 aria-live="polite"
                               >
@@ -352,7 +364,7 @@ const HowItWorksSection = () => {
                           
                           {/* Code content */}
                           <pre 
-                            className="p-4 pt-10 pb-4 rounded-lg overflow-x-auto text-xs sm:text-sm text-foreground/90 leading-relaxed"
+                            className="p-4 pt-10 pb-4 rounded-lg overflow-x-auto text-xs sm:text-sm text-foreground/90 leading-relaxed bg-gradient-to-br from-muted/20 to-muted/10 border border-border/20 group-hover:bg-gradient-to-br group-hover:from-muted/30 group-hover:to-muted/20 transition-all duration-300"
                             tabIndex={0}
                             role="region"
                             aria-label={`${step.language} code example for ${step.title}`}
@@ -366,12 +378,13 @@ const HowItWorksSection = () => {
                 </div>
 
                 {/* Features section */}
-                <div className="mt-8 pt-6 border-t border-border/30">
-                  <div className="bg-muted/30 rounded-lg p-4 sm:p-6">
+                <div className="mt-8 pt-6 border-t border-gradient-to-r from-transparent via-border/50 to-transparent relative">
+                  <div className="bg-gradient-to-br from-muted/40 via-muted/30 to-muted/40 rounded-xl p-4 sm:p-6 border border-border/30 shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-sm">
                     <h4 
-                      className="text-sm sm:text-base font-semibold text-foreground mb-4 text-center"
+                      className="text-sm sm:text-base font-semibold text-foreground mb-4 text-center flex items-center justify-center gap-2"
                       id={`${key}-features-title`}
                     >
+                      <CheckCircle className="h-4 w-4 text-green-500" aria-hidden="true" />
                       Key Features
                     </h4>
                     <div 
@@ -382,14 +395,14 @@ const HowItWorksSection = () => {
                       {integration.features.map((feature, index) => (
                         <div 
                           key={index} 
-                          className="flex items-center gap-2 text-sm sm:text-base text-muted-foreground justify-center sm:justify-start"
+                          className="flex items-center gap-2 text-sm sm:text-base text-muted-foreground justify-center sm:justify-start px-3 py-2 rounded-lg bg-background/50 border border-border/30 hover:bg-background/70 hover:border-primary/20 hover:text-foreground transition-all duration-300 group"
                           role="listitem"
                         >
                           <CheckCircle 
-                            className="h-4 w-4 text-green-500 flex-shrink-0" 
+                            className="h-4 w-4 text-green-500 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" 
                             aria-hidden="true"
                           />
-                          <span>{feature}</span>
+                          <span className="font-medium">{feature}</span>
                         </div>
                       ))}
                     </div>
