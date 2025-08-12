@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Menu, X, ExternalLink, Wallet, Shield, CheckCircle } from "lucide-react";
+import { Menu, X, ExternalLink, Wallet, Shield, CheckCircle, ChevronRight } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { buttonHoverAnimation, buttonContent } from "@/lib/animations";
@@ -96,22 +96,35 @@ const Navbar = () => {
     }, 100);
   };
 
-  // Close menu when clicking outside
+  // Close menu when clicking outside or pressing Escape
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      // Check if click is outside the menu and menu button
+      const menuButton = document.querySelector('button[aria-controls="mobile-menu"]');
+      if (menuRef.current && 
+          !menuRef.current.contains(event.target as Node) && 
+          menuButton && 
+          !menuButton.contains(event.target as Node)) {
         setIsMenuOpen(false);
       }
     }
 
-    // Add event listener when menu is open
+    function handleEscapeKey(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setIsMenuOpen(false);
+      }
+    }
+
+    // Add event listeners when menu is open
     if (isMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleEscapeKey);
     }
 
     // Clean up
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscapeKey);
     };
   }, [isMenuOpen]);
 
@@ -173,7 +186,7 @@ const Navbar = () => {
           <Link to="/" className="flex items-center space-x-3 group">
             <div className="relative">
               <img
-                src="/lovable-uploads/42dcfff0-6a9c-4d69-908b-9729c5f9000b.png"
+                src="/IMG/ckPayment-Logo.png"
                 alt="ckPayment Logo"
                 className="h-12 w-auto hover:opacity-80 transition-all duration-300 group-hover:scale-105"
               />
@@ -245,10 +258,14 @@ const Navbar = () => {
             {/* Mobile Menu Button - Improved */}
             <button
               className="md:hidden p-3 -mr-2 rounded-full text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background transition-all duration-200"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label={isMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMenuOpen(!isMenuOpen);
+              }}
+              aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={isMenuOpen}
               aria-controls="mobile-menu"
+              type="button"
             >
               <div className="relative w-6 h-6 flex items-center justify-center">
                 <span className={`absolute h-0.5 w-6 bg-current rounded-full transition-all duration-300 ${isMenuOpen ? 'rotate-45' : '-translate-y-1.5'}`}></span>
@@ -272,11 +289,12 @@ const Navbar = () => {
       {/* Mobile Menu - Improved */}
       <div
         ref={menuRef}
-        className={`fixed inset-0 top-16 z-40 md:hidden overflow-y-auto transition-all duration-300 ease-in-out transform ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`fixed inset-x-0 top-16 bottom-auto z-40 md:hidden transition-all duration-300 ease-in-out transform ${isMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0 pointer-events-none'}`}
         id="mobile-menu"
       >
-        <div className="bg-background/95 backdrop-blur-sm p-6 h-full overflow-y-auto">
-          <div className="flex flex-col space-y-3 py-2">
+        <div className="bg-background/95 backdrop-blur-sm p-4 rounded-b-2xl shadow-2xl border border-border/20 max-h-[80vh] overflow-y-auto">
+          <div className="flex flex-col space-y-2 py-2">
+            {/* Main Navigation Items */}
             {navItems.map((item) => {
               const isActive = location.pathname === '/' && activeSection === item.id;
 
@@ -285,51 +303,63 @@ const Navbar = () => {
                   (item.id === 'how-it-works' && location.pathname === '/how-it-works');
 
                 return (
-                  <div key={item.id} className="space-y-2">
-                    <button
-                      onClick={() => scrollToSection(item.id)}
-                      className={`py-4 px-5 text-left hover:bg-muted/80 active:bg-muted/60 rounded-lg transition-all w-full text-base flex items-center justify-between ${isActive || isCurrentPage ? 'text-primary bg-muted/50 font-medium' : 'text-foreground'}`}
-                      aria-label={`Ir a ${item.label}`}
-                    >
-                      <span>{item.label}</span>
-                      {isActive && <div className="w-2 h-2 rounded-full bg-primary"></div>}
-                    </button>
+                  <div key={item.id} className="relative group">
                     <Link
                       to={`/${item.id}`}
-                      className="py-3 px-6 -mt-2 mb-2 text-left hover:bg-muted/50 rounded-lg transition-colors text-muted-foreground text-sm flex items-center space-x-2"
+                      className={`block py-3 px-4 text-left rounded-lg transition-all ${isActive || isCurrentPage ? 'text-primary bg-muted/30 font-medium' : 'text-foreground hover:bg-muted/50'}`}
+                      onClick={() => setIsMenuOpen(false)}
                     >
-                      <span>Ver más sobre {item.label}</span>
-                      <ExternalLink className="h-3.5 w-3.5" />
+                      <div className="flex items-center justify-between">
+                        <span>{item.label}</span>
+                        <div className="flex items-center">
+                          {isActive && <div className="w-2 h-2 rounded-full bg-primary mr-2"></div>}
+                          <ChevronRight className="h-4 w-4 opacity-70 group-hover:translate-x-1 transition-transform" />
+                        </div>
+                      </div>
                     </Link>
                   </div>
                 );
               }
 
               return (
-                <button
+                <a
                   key={item.id}
-                  onClick={() => scrollToSection(item.id)}
-                  className={`py-4 px-5 text-left hover:bg-muted/80 active:bg-muted/60 rounded-lg transition-all w-full text-base flex items-center justify-between ${isActive ? 'text-primary bg-muted/50 font-medium' : 'text-foreground'}`}
-                  aria-label={`Ir a ${item.label}`}
+                  href={item.external ? `https://docs.ckpayment.com/${item.id}` : `#${item.id}`}
+                  target={item.external ? "_blank" : "_self"}
+                  rel={item.external ? "noopener noreferrer" : ""}
+                  onClick={(e) => {
+                    if (!item.external) {
+                      e.preventDefault();
+                      scrollToSection(item.id);
+                    }
+                    setIsMenuOpen(false);
+                  }}
+                  className={`block py-3 px-4 text-left rounded-lg transition-all ${isActive ? 'text-primary bg-muted/30 font-medium' : 'text-foreground hover:bg-muted/50'}`}
                 >
-                  <span>{item.label}</span>
-                  <div className="flex items-center space-x-2">
-                    {isActive && <div className="w-2 h-2 rounded-full bg-primary"></div>}
-                    {item.external && <ExternalLink className="h-3.5 w-3.5 opacity-70" />}
+                  <div className="flex items-center justify-between">
+                    <span>{item.label}</span>
+                    <div className="flex items-center">
+                      {isActive && <div className="w-2 h-2 rounded-full bg-primary mr-2"></div>}
+                      {item.external ? (
+                        <ExternalLink className="h-3.5 w-3.5 opacity-70" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4 opacity-70" />
+                      )}
+                    </div>
                   </div>
-                </button>
+                </a>
               );
             })}
             {/* Test Wallet Button for Mobile - Improved */}
-            <div className="mt-6 pt-4 border-t border-border/50 space-y-3">
+            <div className="sticky bottom-0 bg-background/80 backdrop-blur-sm -mx-4 -mb-4 px-4 pt-4 pb-6 border-t border-border/20 mt-6 space-y-3">
               <Button
                 variant="outline"
                 className="w-full py-5 text-base border-primary/30 hover:border-primary/50 text-primary hover:bg-primary/5 hover:text-primary transition-all duration-300"
                 onClick={handleIIConnect}
-                aria-label="Conectar billetera con Internet Identity"
+                aria-label="Connect wallet with Internet Identity"
               >
                 <Wallet className="mr-2 h-5 w-5" />
-                Conectar Billetera
+                Connect Wallet
               </Button>
 
               <Button
@@ -338,9 +368,9 @@ const Navbar = () => {
                   scrollToSection('get-started');
                   setIsMenuOpen(false);
                 }}
-                aria-label="Comenzar con ckPayment"
+                aria-label="Get started with ckPayment"
               >
-                Comenzar Ahora
+                Get Started Now
               </Button>
             </div>
           </div>
