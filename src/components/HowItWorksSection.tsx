@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Code, Smartphone, Server, Check, Copy, Terminal, Zap, CheckCircle, ArrowRight, Globe, LucideIcon } from "lucide-react";
 import { Button } from "./ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "./ui/badge";
 
 type IntegrationType = 'web' | 'mobile' | 'api';

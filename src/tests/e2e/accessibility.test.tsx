@@ -3,6 +3,7 @@
  * Tests dashboard compliance with WCAG guidelines and screen reader compatibility
  */
 
+import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
@@ -21,7 +22,6 @@ const MockAccessibleDashboard = () => {
   return (
     <div 
       data-testid="accessible-dashboard"
-      role="main"
       aria-label="ICP Dashboard"
       className={`dashboard ${highContrast ? 'high-contrast' : ''} ${reducedMotion ? 'reduced-motion' : ''}`}
     >
@@ -253,26 +253,11 @@ const MockAccessibleDashboard = () => {
   );
 };
 
-// Mock React
-jest.mock('react', () => ({
-  ...jest.requireActual('react'),
-  useState: jest.fn(),
-  useEffect: jest.fn(),
-  useCallback: jest.fn((fn) => fn),
-  useMemo: jest.fn((fn) => fn()),
-}));
-
 describe('Accessibility E2E Tests', () => {
   let user: any;
-  let mockSetState: jest.Mock;
 
   beforeEach(() => {
     user = userEvent.setup();
-    mockSetState = jest.fn();
-    
-    // Mock React state
-    (React.useState as jest.Mock).mockImplementation((initial) => [initial, mockSetState]);
-
     jest.useFakeTimers();
   });
 

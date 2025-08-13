@@ -8,13 +8,6 @@ import { RealTimeDataManager } from '../../services/realtime-data-manager';
 import { NotificationSystem } from '../../components/ui/notification-system';
 import { ErrorCategory, ErrorSeverity } from '../../types/dashboard';
 
-// Mock React and DOM for notification system
-jest.mock('react', () => ({
-  useState: jest.fn(() => [[], jest.fn()]),
-  useEffect: jest.fn(),
-  useCallback: jest.fn((fn) => fn),
-}));
-
 describe('Error Recovery Workflow Integration', () => {
   let errorHandler: ErrorHandlerService;
   let dataManager: RealTimeDataManager;

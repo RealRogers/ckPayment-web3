@@ -107,10 +107,15 @@ export class RealTimeDataManager {
     };
   }
 
+  private log(...args: any[]) {
+    // A simple logging wrapper. Can be expanded later.
+    // console.log('[RealTimeDataManager]', ...args);
+  }
+
   /**
    * Start real-time updates
    */
-  startRealTimeUpdates(canisterId?: string): void {
+  async startRealTimeUpdates(canisterId?: string): Promise<void> {
     if (this.isActive) {
       console.warn('Real-time updates already active');
       return;
@@ -121,15 +126,13 @@ export class RealTimeDataManager {
     this.errorCount = 0;
     this.reconnectCount = 0;
 
-    console.log('Starting real-time updates...');
+    this.log('Starting real-time updates...');
 
     // Initialize WebSocket connection if enabled
     if (this.config.enableWebSocket) {
-      this.initializeWebSocket();
-    }
-
-    // Initialize polling fallback if enabled
-    if (this.config.enablePollingFallback) {
+      await this.initializeWebSocket();
+    } else if (this.config.enablePollingFallback) {
+      // If websockets are disabled, start polling immediately.
       this.initializePolling();
     }
 

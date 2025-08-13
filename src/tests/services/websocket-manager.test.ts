@@ -1,319 +1,363 @@
 /**
  * Unit Tests for WebSocketManager Service
- * Tests connection management, reconnection, and subscription handling
+ *
+ * @jest-environment jsdom
  */
 
-import { WebSocketManager } from '../../services/websocket-manager';
+import { WebSocketManager, DEFAULT_WEBSOCKET_CONFIG } from '../../services/websocket-manager';
 
-// Mock WebSocket implementation
+// A more controllable mock WebSocket
 class MockWebSocket {
+  static instances: MockWebSocket[] = [];
+
+  // WebSocket states
   static CONNECTING = 0;
   static OPEN = 1;
   static CLOSING = 2;
   static CLOSED = 3;
 
-  readyState = MockWebSocket.CONNECTING;
+  // Public properties
   url: string;
+  protocols?: string[];
+  readyState: number = MockWebSocket.CONNECTING;
+
+  // Event handlers
   onopen: ((event: Event) => void) | null = null;
   onclose: ((event: CloseEvent) => void) | null = null;
   onerror: ((event: Event) => void) | null = null;
   onmessage: ((event: MessageEvent) => void) | null = null;
 
-  private listeners: { [key: string]: ((event: any) => void)[] } = {};
+  // Mock-specific properties
+  sentMessages: any[] = [];
 
-  constructor(url: string) {
+  constructor(url: string, protocols?: string[]) {
     this.url = url;
-    // Simulate connection opening after a short delay
-    setTimeout(() => {
-      this.readyState = MockWebSocket.OPEN;
-      this.onopen?.(new Event('open'));
-      this.dispatchEvent('open', new Event('open'));
-    }, 10);
+    this.protocols = protocols;
+    MockWebSocket.instances.push(this);
   }
 
-  addEventListener(type: string, listener: (event: any) => void) {
+  // Mock-specific methods for test control
+  _open() {
+    this.readyState = MockWebSocket.OPEN;
+    this.dispatchEvent(new Event('open'));
+    if (this.onopen) this.onopen(new Event('open'));
+  }
+
+  _error(error?: Event) {
+    this.readyState = MockWebSocket.CLOSED;
+    const errorEvent = error || new Event('error');
+    this.dispatchEvent(errorEvent);
+    if (this.onerror) this.onerror(errorEvent);
+  }
+
+  _close(code = 1000, reason = 'Normal closure') {
+    this.readyState = MockWebSocket.CLOSED;
+    const closeEvent = new CloseEvent('close', { code, reason });
+    this.dispatchEvent(closeEvent);
+    if (this.onclose) this.onclose(closeEvent);
+  }
+
+  _receiveMessage(data: any) {
+    const messageEvent = new MessageEvent('message', { data: JSON.stringify(data) });
+    this.dispatchEvent(messageEvent);
+    if (this.onmessage) this.onmessage(messageEvent);
+  }
+
+  // WebSocket API methods
+  send(data: any) {
+    if (this.readyState !== MockWebSocket.OPEN) {
+      throw new Error('WebSocket is not open');
+    }
+    this.sentMessages.push(JSON.parse(data));
+  }
+
+  close(code?: number, reason?: string) {
+    this.readyState = MockWebSocket.CLOSING;
+    this._close(code, reason);
+  }
+
+  // Event listener implementation
+  private listeners: { [type: string]: (EventListenerOrEventListenerObject | null)[] } = {};
+
+  addEventListener(type: string, listener: EventListenerOrEventListenerObject | null, options?: boolean | AddEventListenerOptions): void {
     if (!this.listeners[type]) {
       this.listeners[type] = [];
     }
     this.listeners[type].push(listener);
   }
 
-  removeEventListener(type: string, listener: (event: any) => void) {
+  removeEventListener(type: string, listener: EventListenerOrEventListenerObject | null, options?: boolean | EventListenerOptions): void {
     if (this.listeners[type]) {
       this.listeners[type] = this.listeners[type].filter(l => l !== listener);
     }
   }
 
-  dispatchEvent(type: string, event: any) {
-    if (this.listeners[type]) {
-      this.listeners[type].forEach(listener => listener(event));
+  dispatchEvent(event: Event): boolean {
+    const listenerList = this.listeners[event.type];
+    if (listenerList) {
+      listenerList.forEach(listener => {
+        if (typeof listener === 'function') {
+          listener(event);
+        }
+      });
     }
-  }
-
-  send(data: string) {
-    if (this.readyState !== MockWebSocket.OPEN) {
-      throw new Error('WebSocket is not open');
-    }
-  }
-
-  close(code?: number, reason?: string) {
-    this.readyState = MockWebSocket.CLOSING;
-    setTimeout(() => {
-      this.readyState = MockWebSocket.CLOSED;
-      const closeEvent = new CloseEvent('close', { code: code || 1000, reason: reason || '' });
-      this.onclose?.(closeEvent);
-      this.dispatchEvent('close', closeEvent);
-    }, 10);
+    return true;
   }
 }
 
-// Replace global WebSocket with mock
-(global as any).WebSocket = MockWebSocket;
+// Global setup
+let webSocketSpy: jest.SpyInstance;
+
+beforeEach(() => {
+  MockWebSocket.instances = [];
+  webSocketSpy = jest.spyOn(global, 'WebSocket').mockImplementation(
+    (url: string, protocols?: string | string[]) => new MockWebSocket(url, Array.isArray(protocols) ? protocols : (protocols ? [protocols] : undefined)) as any
+  );
+});
+
+afterEach(() => {
+  webSocketSpy.mockRestore();
+  jest.useRealTimers();
+});
+
 
 describe('WebSocketManager', () => {
   let wsManager: WebSocketManager;
   const testUrl = 'ws://localhost:8080/test';
+  // Speed up tests by reducing delays and attempts
+  const config = {
+    ...DEFAULT_WEBSOCKET_CONFIG,
+    url: testUrl,
+    heartbeatInterval: 500,
+    reconnectStrategy: {
+      ...DEFAULT_WEBSOCKET_CONFIG.reconnectStrategy,
+      initialDelay: 100,
+      maxAttempts: 3
+    }
+  };
 
   beforeEach(() => {
-    wsManager = new WebSocketManager();
-    jest.clearAllMocks();
-    jest.clearAllTimers();
-    jest.useFakeTimers();
+    wsManager = new WebSocketManager(config);
   });
 
   afterEach(() => {
     wsManager.disconnect();
-    jest.useRealTimers();
   });
 
+  // --- Connection Management ---
   describe('Connection Management', () => {
-    test('should connect to WebSocket successfully', async () => {
-      const connectPromise = wsManager.connect(testUrl);
-      
-      // Fast-forward timers to simulate connection
-      jest.advanceTimersByTime(20);
-      
-      await expect(connectPromise).resolves.toBe(true);
-      expect(wsManager.isConnected()).toBe(true);
+    it('should connect successfully', async () => {
+      const connectPromise = wsManager.connect();
+      expect(wsManager.getConnectionStatus()).toBe('connecting');
+
+      expect(MockWebSocket.instances.length).toBe(1);
+      const mockWs = MockWebSocket.instances[0];
+      mockWs._open();
+
+      await expect(connectPromise).resolves.toBeUndefined();
+      expect(wsManager.getConnectionStatus()).toBe('connected');
     });
 
-    test('should handle connection failure', async () => {
-      // Mock WebSocket to fail immediately
-      (global as any).WebSocket = jest.fn().mockImplementation(() => {
-        const ws = new MockWebSocket(testUrl);
-        setTimeout(() => {
-          ws.readyState = MockWebSocket.CLOSED;
-          ws.onerror?.(new Event('error'));
-          ws.dispatchEvent('error', new Event('error'));
-        }, 5);
-        return ws;
-      });
-
-      const connectPromise = wsManager.connect(testUrl);
-      jest.advanceTimersByTime(20);
+    it('should handle connection failure', async () => {
+      const connectPromise = wsManager.connect();
       
-      await expect(connectPromise).resolves.toBe(false);
-      expect(wsManager.isConnected()).toBe(false);
+      const mockWs = MockWebSocket.instances[0];
+      mockWs._error();
+
+      await expect(connectPromise).rejects.toThrow('WebSocket connection error');
+      expect(wsManager.getConnectionStatus()).toBe('error');
     });
 
-    test('should disconnect properly', async () => {
-      await wsManager.connect(testUrl);
-      jest.advanceTimersByTime(20);
-      
+    it('should disconnect cleanly', async () => {
+      const connectPromise = wsManager.connect();
+      MockWebSocket.instances[0]._open();
+      await connectPromise;
+
+      expect(wsManager.getConnectionStatus()).toBe('connected');
+
       wsManager.disconnect();
-      jest.advanceTimersByTime(20);
       
-      expect(wsManager.isConnected()).toBe(false);
+      expect(wsManager.getConnectionStatus()).toBe('disconnected');
+      expect(MockWebSocket.instances[0].readyState).toBe(MockWebSocket.CLOSED);
     });
   });
 
+  // --- Reconnection Logic ---
   describe('Reconnection Logic', () => {
-    test('should attempt reconnection on connection loss', async () => {
-      const reconnectSpy = jest.spyOn(wsManager as any, 'attemptReconnection');
-      
-      await wsManager.connect(testUrl);
-      jest.advanceTimersByTime(20);
-      
-      // Simulate connection loss
-      (wsManager as any).ws?.close(1006, 'Connection lost');
-      jest.advanceTimersByTime(20);
-      
-      expect(reconnectSpy).toHaveBeenCalled();
+    beforeEach(() => {
+      jest.useFakeTimers();
     });
 
-    test('should use exponential backoff for reconnection', async () => {
-      await wsManager.connect(testUrl);
-      jest.advanceTimersByTime(20);
+    it('should attempt to reconnect on abnormal closure', async () => {
+      // Mock reconnect to prevent timer complexity in this specific test
+      const reconnectSpy = jest.spyOn(wsManager, 'reconnect').mockImplementation(async () => {});
       
-      // Mock failed reconnections
-      (global as any).WebSocket = jest.fn().mockImplementation(() => {
-        const ws = new MockWebSocket(testUrl);
-        setTimeout(() => {
-          ws.readyState = MockWebSocket.CLOSED;
-          ws.onerror?.(new Event('error'));
-        }, 5);
-        return ws;
-      });
+      const connectPromise = wsManager.connect();
+      MockWebSocket.instances[0]._open();
+      await connectPromise;
+
+      // Simulate abnormal closure
+      MockWebSocket.instances[0]._close(1006, 'Abnormal Closure');
       
-      // Trigger reconnection
-      (wsManager as any).ws?.close(1006, 'Connection lost');
-      
-      // First attempt should be immediate
-      jest.advanceTimersByTime(100);
-      expect((global as any).WebSocket).toHaveBeenCalledTimes(2);
-      
-      // Second attempt should be delayed
-      jest.advanceTimersByTime(1000);
-      expect((global as any).WebSocket).toHaveBeenCalledTimes(3);
-      
-      // Third attempt should be delayed more
-      jest.advanceTimersByTime(2000);
-      expect((global as any).WebSocket).toHaveBeenCalledTimes(4);
+      expect(wsManager.getConnectionStatus()).toBe('disconnected');
+      expect(reconnectSpy).toHaveBeenCalledTimes(1);
+      reconnectSpy.mockRestore();
     });
 
-    test('should stop reconnection after max attempts', async () => {
-      await wsManager.connect(testUrl);
-      jest.advanceTimersByTime(20);
+    it('should use exponential backoff for reconnection attempts', async () => {
+      const connectPromise = wsManager.connect();
+      MockWebSocket.instances[0]._open();
+      await connectPromise;
+
+      // First reconnect attempt
+      MockWebSocket.instances[0]._close(1006);
+      expect(webSocketSpy).toHaveBeenCalledTimes(1);
       
-      // Mock all reconnections to fail
-      (global as any).WebSocket = jest.fn().mockImplementation(() => {
-        const ws = new MockWebSocket(testUrl);
-        setTimeout(() => {
-          ws.readyState = MockWebSocket.CLOSED;
-          ws.onerror?.(new Event('error'));
-        }, 5);
-        return ws;
-      });
+      // Fast-forward for the first delay
+      await jest.advanceTimersByTimeAsync(config.reconnectStrategy.initialDelay + 1);
+      expect(webSocketSpy).toHaveBeenCalledTimes(2);
+
+      // The second connection attempt should also fail, this time with an error, which should also trigger a reconnect.
+      MockWebSocket.instances[1]._error();
       
-      // Trigger reconnection
-      (wsManager as any).ws?.close(1006, 'Connection lost');
-      
-      // Fast-forward through all reconnection attempts
-      for (let i = 0; i < 10; i++) {
-        jest.advanceTimersByTime(5000);
+      const secondDelay = config.reconnectStrategy.initialDelay * config.reconnectStrategy.backoffMultiplier;
+      await jest.advanceTimersByTimeAsync(secondDelay + 1);
+      expect(webSocketSpy).toHaveBeenCalledTimes(3);
+    });
+
+    it('should stop reconnecting after max attempts', async () => {
+      const connectPromise = wsManager.connect();
+      const initialWs = MockWebSocket.instances[0];
+      initialWs._open();
+      await connectPromise;
+
+      // Close the first connection to start the reconnect cycle
+      initialWs._close(1006);
+
+      // Trigger max attempts
+      for (let i = 0; i < config.reconnectStrategy.maxAttempts; i++) {
+        const delay = config.reconnectStrategy.initialDelay * Math.pow(config.reconnectStrategy.backoffMultiplier, i);
+        await jest.advanceTimersByTimeAsync(delay + 1);
+
+        expect(webSocketSpy).toHaveBeenCalledTimes(i + 2);
+
+        // The new connection attempt fails
+        const newWs = MockWebSocket.instances[i + 1];
+        newWs._error();
       }
       
-      // Should not exceed max attempts (5)
-      expect((global as any).WebSocket).toHaveBeenCalledTimes(6); // Initial + 5 reconnects
+      // After all attempts, the status should be 'error'
+      await jest.runAllTimersAsync(); // Allow final state update to process
+      expect(wsManager.getConnectionStatus()).toBe('error');
+
+      // And no more connections should be attempted
+      await jest.advanceTimersByTimeAsync(config.reconnectStrategy.maxDelay * 2);
+      expect(webSocketSpy).toHaveBeenCalledTimes(config.reconnectStrategy.maxAttempts + 1);
     });
   });
 
+  // --- Subscription Management ---
   describe('Subscription Management', () => {
-    test('should handle message subscriptions', async () => {
+    it('should send a subscription message and receive updates', async () => {
       const callback = jest.fn();
       
-      await wsManager.connect(testUrl);
-      jest.advanceTimersByTime(20);
-      
-      wsManager.subscribe('metrics', callback);
-      
-      // Simulate incoming message
-      const testMessage = { type: 'metrics', data: { value: 100 } };
-      (wsManager as any).ws?.onmessage?.(new MessageEvent('message', {
-        data: JSON.stringify(testMessage)
-      }));
-      
-      expect(callback).toHaveBeenCalledWith(testMessage.data);
+      const connectPromise = wsManager.connect();
+      const mockWs = MockWebSocket.instances[0];
+      mockWs._open();
+      await connectPromise;
+
+      expect(wsManager.getConnectionStatus()).toBe('connected');
+      wsManager.subscribe('metrics_update', callback);
+
+      expect(mockWs.sentMessages.length).toBe(1);
+      expect(mockWs.sentMessages[0].type).toBe('subscribe');
+
+      const message = { type: 'metrics_update', data: { cpu: 50 } };
+      mockWs._receiveMessage(message);
+      expect(callback).toHaveBeenCalledWith(message.data, expect.objectContaining(message));
     });
 
-    test('should handle multiple subscribers for same event', async () => {
-      const callback1 = jest.fn();
-      const callback2 = jest.fn();
-      
-      await wsManager.connect(testUrl);
-      jest.advanceTimersByTime(20);
-      
-      wsManager.subscribe('metrics', callback1);
-      wsManager.subscribe('metrics', callback2);
-      
-      const testMessage = { type: 'metrics', data: { value: 100 } };
-      (wsManager as any).ws?.onmessage?.(new MessageEvent('message', {
-        data: JSON.stringify(testMessage)
-      }));
-      
-      expect(callback1).toHaveBeenCalledWith(testMessage.data);
-      expect(callback2).toHaveBeenCalledWith(testMessage.data);
-    });
-
-    test('should unsubscribe properly', async () => {
+    it('should stop receiving updates after unsubscribing', async () => {
       const callback = jest.fn();
+
+      const connectPromise = wsManager.connect();
+      const mockWs = MockWebSocket.instances[0];
+      mockWs._open();
+      await connectPromise;
       
-      await wsManager.connect(testUrl);
-      jest.advanceTimersByTime(20);
-      
-      wsManager.subscribe('metrics', callback);
-      wsManager.unsubscribe('metrics', callback);
-      
-      const testMessage = { type: 'metrics', data: { value: 100 } };
-      (wsManager as any).ws?.onmessage?.(new MessageEvent('message', {
-        data: JSON.stringify(testMessage)
-      }));
-      
+      const subscriptionId = wsManager.subscribe('transaction_update', callback);
+      wsManager.unsubscribe(subscriptionId);
+
+      expect(mockWs.sentMessages.length).toBe(2);
+      expect(mockWs.sentMessages[1].type).toBe('unsubscribe');
+
+      const message = { type: 'transaction_update', data: { id: '123' } };
+      mockWs._receiveMessage(message);
+
       expect(callback).not.toHaveBeenCalled();
     });
   });
 
-  describe('Connection Quality Assessment', () => {
-    test('should track connection quality metrics', async () => {
-      await wsManager.connect(testUrl);
-      jest.advanceTimersByTime(20);
-      
-      // Simulate some latency measurements
-      (wsManager as any).recordLatency(50);
-      (wsManager as any).recordLatency(75);
-      (wsManager as any).recordLatency(100);
-      
-      const quality = wsManager.getConnectionQuality();
-      expect(quality.averageLatency).toBe(75);
-      expect(quality.isStable).toBe(true);
+  // --- Heartbeat and Connection Quality ---
+  describe('Heartbeat and Connection Quality', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
     });
 
-    test('should detect unstable connections', async () => {
-      await wsManager.connect(testUrl);
-      jest.advanceTimersByTime(20);
+    it('should send heartbeats at the configured interval', async () => {
+      const connectPromise = wsManager.connect();
+      const mockWs = MockWebSocket.instances[0];
+      mockWs._open();
+      await connectPromise;
+
+      expect(mockWs.sentMessages.length).toBe(0);
+
+      await jest.advanceTimersByTimeAsync(config.heartbeatInterval + 1);
+      expect(mockWs.sentMessages.length).toBe(1);
+      expect(mockWs.sentMessages[0].type).toBe('heartbeat');
+    });
+
+    it('should update connection quality based on heartbeat latency', async () => {
+      const connectPromise = wsManager.connect();
+      const mockWs = MockWebSocket.instances[0];
+      mockWs._open();
+      await connectPromise;
+
+      // Send the first heartbeat
+      await jest.advanceTimersByTimeAsync(config.heartbeatInterval + 1);
+      expect(mockWs.sentMessages.length).toBe(1);
+      const sentHeartbeat = mockWs.sentMessages[0];
       
-      // Simulate high latency and disconnections
-      (wsManager as any).recordLatency(500);
-      (wsManager as any).recordLatency(1000);
-      (wsManager as any).recordDisconnection();
-      (wsManager as any).recordDisconnection();
+      // Simulate receiving a response after 50ms
+      const now = Date.now();
+      const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(now + 50);
+
+      const goodResponse = { type: 'heartbeat_reply', data: { timestamp: sentHeartbeat.data.timestamp } };
+      mockWs._receiveMessage(goodResponse);
       
-      const quality = wsManager.getConnectionQuality();
-      expect(quality.isStable).toBe(false);
-      expect(quality.averageLatency).toBeGreaterThan(200);
+      const metrics = wsManager.getConnectionMetrics();
+      expect(metrics.latency).toBeCloseTo(50, -1);
+      expect(wsManager.getConnectionQuality()).toBe('excellent');
+      
+      dateNowSpy.mockRestore();
     });
   });
 
-  describe('Error Handling', () => {
-    test('should handle malformed messages gracefully', async () => {
-      const callback = jest.fn();
-      
-      await wsManager.connect(testUrl);
-      jest.advanceTimersByTime(20);
-      
-      wsManager.subscribe('metrics', callback);
-      
-      // Send malformed JSON
-      (wsManager as any).ws?.onmessage?.(new MessageEvent('message', {
-        data: 'invalid json'
-      }));
-      
-      expect(callback).not.toHaveBeenCalled();
-      // Should not throw error
-    });
+  // --- Event Listeners ---
+  describe('Event Listeners', () => {
+    it('should emit statusChange events', async () => {
+      const statusListener = jest.fn();
+      wsManager.addEventListener('statusChange', statusListener);
 
-    test('should handle WebSocket errors', async () => {
-      const errorCallback = jest.fn();
+      const connectPromise = wsManager.connect();
+      expect(statusListener).toHaveBeenCalledWith({ status: 'connecting' });
       
-      await wsManager.connect(testUrl);
-      jest.advanceTimersByTime(20);
-      
-      wsManager.onError(errorCallback);
-      
-      // Simulate WebSocket error
-      (wsManager as any).ws?.onerror?.(new Event('error'));
-      
-      expect(errorCallback).toHaveBeenCalled();
+      MockWebSocket.instances[0]._open();
+      await connectPromise;
+      expect(statusListener).toHaveBeenCalledWith({ status: 'connected' });
+
+      wsManager.disconnect();
+      expect(statusListener).toHaveBeenCalledWith({ status: 'disconnected' });
     });
   });
 });

@@ -15,7 +15,11 @@ export type WebSocketEventType =
   | 'error_update'
   | 'canister_status'
   | 'subnet_health'
-  | 'cycle_alert';
+  | 'cycle_alert'
+  | 'subscribe'
+  | 'unsubscribe'
+  | 'heartbeat'
+  | 'heartbeat_reply';
 
 /**
  * Reconnection strategy configuration
@@ -38,6 +42,7 @@ export interface WebSocketConfig {
   reconnectStrategy: ReconnectStrategy;
   maxMessageSize: number;
   compressionEnabled: boolean;
+  heartbeatEnabled?: boolean;
 }
 
 /**
@@ -73,24 +78,52 @@ export interface ConnectionMetrics {
   errorCount: number;
 }
 
+// Simple EventEmitter
+class EventEmitter {
+    private events: { [key: string]: Function[] } = {};
+
+    public addEventListener(event: string, listener: Function): void {
+        if (!this.events[event]) {
+            this.events[event] = [];
+        }
+        this.events[event].push(listener);
+    }
+
+    public removeEventListener(event: string, listener: Function): void {
+        if (!this.events[event]) return;
+        this.events[event] = this.events[event].filter(l => l !== listener);
+    }
+
+    protected emit(event: string, data?: any): void {
+        if (!this.events[event]) return;
+        this.events[event].forEach(listener => listener(data));
+    }
+}
+
+
 /**
  * WebSocket Manager for real-time ICP dashboard updates
  * Handles connection lifecycle, subscriptions, and automatic reconnection
  */
-export class WebSocketManager {
+export class WebSocketManager extends EventEmitter {
   private ws: WebSocket | null = null;
   private config: WebSocketConfig;
-  private subscriptions = new Map<string, SubscriptionCallback>();
+  private subscriptions: { [id: string]: { channel: string, callback: Function } } = {};
   private connectionStatus: ConnectionStatus = 'disconnected';
-  private connectionQuality: ConnectionQuality = 'excellent';
   private reconnectAttempts = 0;
-  private reconnectTimer: NodeJS.Timeout | null = null;
-  private heartbeatTimer: NodeJS.Timeout | null = null;
-  private lastHeartbeat: Date | null = null;
+  private reconnectTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private heartbeatIntervalId: ReturnType<typeof setInterval> | null = null;
+  private lastHeartbeatTimestamp = 0;
   private connectionMetrics: ConnectionMetrics;
-  private eventListeners = new Map<string, Set<(event: any) => void>>();
+  private subscriptionCounter = 0;
+
+  private connectionPromise?: {
+    resolve: () => void;
+    reject: (error: Error) => void;
+  };
 
   constructor(config: WebSocketConfig) {
+    super();
     this.config = config;
     this.connectionMetrics = {
       latency: 0,
@@ -98,492 +131,216 @@ export class WebSocketManager {
       messagesReceived: 0,
       reconnectCount: 0,
       uptime: 0,
-      errorCount: 0
+      errorCount: 0,
     };
   }
 
-  /**
-   * Establish WebSocket connection
-   */
-  async connect(canisterId?: string): Promise<void> {
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      console.warn('WebSocket already connected');
-      return;
+  private log(...args: any[]) {
+    // console.log('[WebSocketManager]', ...args);
+  }
+
+  public connect(canisterId?: string): Promise<void> {
+    // Prevent multiple concurrent connection attempts
+    if (this.connectionStatus === 'connecting') {
+      return new Promise((resolve, reject) => {
+        const checkStatus = () => {
+          if (this.connectionStatus === 'connected') resolve();
+          else if (this.connectionStatus === 'error' || this.connectionStatus === 'disconnected') reject(new Error('Connection failed during concurrent attempt.'));
+          else setTimeout(checkStatus, 100);
+        };
+        checkStatus();
+      });
     }
 
-    this.setConnectionStatus('connecting');
-    
-    try {
-      // Construct WebSocket URL with canister ID if provided
-      const url = canisterId 
-        ? `${this.config.url}?canister=${canisterId}`
-        : this.config.url;
+    return new Promise<void>((resolve, reject) => {
+      this.connectionPromise = { resolve, reject };
 
+      this.setConnectionStatus('connecting');
+      const url = canisterId ? `${this.config.url}?canister=${canisterId}` : this.config.url;
       this.ws = new WebSocket(url, this.config.protocols);
-      
-      // Configure WebSocket event handlers
       this.setupEventHandlers();
-      
-      // Wait for connection to open
-      await this.waitForConnection();
-      
-      // Start heartbeat mechanism
-      this.startHeartbeat();
-      
-      // Reset reconnect attempts on successful connection
+    });
+  }
+
+  private setupEventHandlers(): void {
+    if (!this.ws) return;
+
+    this.ws.addEventListener('open', () => {
+      this.log('WebSocket connected');
+      this.setConnectionStatus('connected');
       this.reconnectAttempts = 0;
-      
-      this.emit('connected', { canisterId });
-      
-    } catch (error) {
-      this.handleConnectionError(error as Error);
-      throw error;
+      this.startHeartbeat();
+      this.connectionPromise?.resolve();
+    });
+
+    this.ws.addEventListener('close', (event) => {
+      this.log(`WebSocket closed: ${event.code} ${event.reason}`);
+      this.stopHeartbeat();
+      const wasConnected = this.connectionStatus === 'connected';
+      this.setConnectionStatus('disconnected');
+
+      if (event.code !== 1000 && wasConnected) {
+        this.reconnect();
+      } else if (!wasConnected && this.connectionPromise) {
+        this.handleConnectionError(new Error(`WebSocket disconnected unexpectedly: ${event.code}`), false);
+      }
+    });
+
+    this.ws.addEventListener('error', (event) => {
+      this.log('WebSocket error:', event);
+      const error = new Error('WebSocket connection error');
+      this.handleConnectionError(error);
+    });
+
+    this.ws.addEventListener('message', (event) => {
+      this.handleMessage(event);
+    });
+  }
+
+  private handleConnectionError(error: Error, shouldReject = true) {
+    this.log(error.message);
+    this.connectionMetrics.errorCount++;
+    this.setConnectionStatus('error');
+    if (shouldReject) {
+        this.connectionPromise?.reject(error);
     }
   }
 
-  /**
-   * Disconnect WebSocket connection
-   */
-  disconnect(): void {
-    this.clearReconnectTimer();
-    this.clearHeartbeatTimer();
-    
+  private handleMessage(event: MessageEvent) {
+    this.connectionMetrics.messagesReceived++;
+    const message = JSON.parse(event.data);
+
+    if (message.type === 'heartbeat_reply') {
+      this.connectionMetrics.latency = Date.now() - message.data.timestamp;
+      return;
+    }
+
+    Object.values(this.subscriptions).forEach(sub => {
+      if (sub.channel === message.type) {
+        sub.callback(message.data, message);
+      }
+    });
+  }
+
+  public disconnect(): void {
+    this.stopHeartbeat();
+    if (this.reconnectTimeoutId) {
+      clearTimeout(this.reconnectTimeoutId);
+      this.reconnectTimeoutId = null;
+    }
     if (this.ws) {
       this.ws.close(1000, 'Client disconnect');
-      this.ws = null;
     }
-    
     this.setConnectionStatus('disconnected');
-    this.emit('disconnected', {});
   }
 
-  /**
-   * Reconnect with exponential backoff
-   */
-  async reconnect(): Promise<void> {
+  public reconnect(): void {
     if (this.reconnectAttempts >= this.config.reconnectStrategy.maxAttempts) {
-      console.error('Max reconnection attempts reached');
-      this.setConnectionStatus('error');
+      this.log('Max reconnection attempts reached.');
+      this.handleConnectionError(new Error('Max reconnection attempts reached.'));
       return;
     }
 
-    const delay = this.calculateReconnectDelay();
-    console.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts + 1})`);
-    
-    this.reconnectTimer = setTimeout(async () => {
+    const delay = this.config.reconnectStrategy.initialDelay * Math.pow(this.config.reconnectStrategy.backoffMultiplier, this.reconnectAttempts);
+    this.reconnectAttempts++;
+    this.connectionMetrics.reconnectCount++;
+    this.connectionMetrics.lastReconnect = new Date();
+
+    this.log(`Reconnecting in ${Math.round(delay)}ms (attempt ${this.reconnectAttempts})`);
+
+    this.reconnectTimeoutId = setTimeout(async () => {
       try {
-        this.reconnectAttempts++;
-        this.connectionMetrics.reconnectCount++;
-        this.connectionMetrics.lastReconnect = new Date();
-        
         await this.connect();
-        
       } catch (error) {
-        console.error('Reconnection failed:', error);
-        this.reconnect(); // Try again
+        this.log('Reconnection attempt failed.');
+        // Only schedule the next reconnect if we are not already in a connecting state
+        // to avoid race conditions.
+        if (this.connectionStatus !== 'connecting') {
+          this.reconnect();
+        }
       }
     }, delay);
   }
 
-  /**
-   * Subscribe to specific event types
-   */
-  subscribe<T = any>(eventType: WebSocketEventType, callback: SubscriptionCallback<T>): string {
-    const subscriptionId = `${eventType}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    this.subscriptions.set(subscriptionId, callback as SubscriptionCallback);
-    
-    // Send subscription message to server
-    this.sendMessage({
-      type: 'subscribe' as WebSocketEventType,
-      timestamp: new Date().toISOString(),
-      data: { eventType, subscriptionId }
-    });
-    
-    return subscriptionId;
-  }
-
-  /**
-   * Unsubscribe from events
-   */
-  unsubscribe(subscriptionId: string): void {
-    if (this.subscriptions.has(subscriptionId)) {
-      this.subscriptions.delete(subscriptionId);
-      
-      // Send unsubscription message to server
-      this.sendMessage({
-        type: 'unsubscribe' as WebSocketEventType,
-        timestamp: new Date().toISOString(),
-        data: { subscriptionId }
-      });
-    }
-  }
-
-  /**
-   * Get current connection status
-   */
-  getConnectionStatus(): ConnectionStatus {
-    return this.connectionStatus;
-  }
-
-  /**
-   * Get connection quality assessment
-   */
-  getConnectionQuality(): ConnectionQuality {
-    return this.connectionQuality;
-  }
-
-  /**
-   * Get connection metrics
-   */
-  getConnectionMetrics(): ConnectionMetrics {
-    return { ...this.connectionMetrics };
-  }
-
-  /**
-   * Set heartbeat interval
-   */
-  setHeartbeatInterval(interval: number): void {
-    this.config.heartbeatInterval = interval;
-    
-    if (this.heartbeatTimer) {
-      this.clearHeartbeatTimer();
-      this.startHeartbeat();
-    }
-  }
-
-  /**
-   * Set reconnection strategy
-   */
-  setReconnectStrategy(strategy: ReconnectStrategy): void {
-    this.config.reconnectStrategy = strategy;
-  }
-
-  /**
-   * Add event listener for connection events
-   */
-  addEventListener(event: string, listener: (event: any) => void): void {
-    if (!this.eventListeners.has(event)) {
-      this.eventListeners.set(event, new Set());
-    }
-    this.eventListeners.get(event)!.add(listener);
-  }
-
-  /**
-   * Remove event listener
-   */
-  removeEventListener(event: string, listener: (event: any) => void): void {
-    const listeners = this.eventListeners.get(event);
-    if (listeners) {
-      listeners.delete(listener);
-    }
-  }
-
-  // ===== PRIVATE METHODS =====
-
-  /**
-   * Setup WebSocket event handlers
-   */
-  private setupEventHandlers(): void {
-    if (!this.ws) return;
-
-    this.ws.onopen = (event) => {
-      console.log('WebSocket connected');
-      this.setConnectionStatus('connected');
-      this.updateConnectionQuality();
-      this.emit('open', event);
-    };
-
-    this.ws.onmessage = (event) => {
-      this.handleMessage(event);
-    };
-
-    this.ws.onclose = (event) => {
-      console.log('WebSocket closed:', event.code, event.reason);
-      this.setConnectionStatus('disconnected');
-      this.clearHeartbeatTimer();
-      
-      // Attempt reconnection if not a clean close
-      if (event.code !== 1000 && this.reconnectAttempts < this.config.reconnectStrategy.maxAttempts) {
-        this.reconnect();
-      }
-      
-      this.emit('close', event);
-    };
-
-    this.ws.onerror = (event) => {
-      console.error('WebSocket error:', event);
-      this.connectionMetrics.errorCount++;
-      this.handleConnectionError(new Error('WebSocket connection error'));
-      this.emit('error', event);
-    };
-  }
-
-  /**
-   * Handle incoming WebSocket messages
-   */
-  private handleMessage(event: MessageEvent): void {
-    try {
-      this.connectionMetrics.messagesReceived++;
-      
-      let message: WebSocketMessage;
-      
-      // Handle compressed messages if enabled
-      if (this.config.compressionEnabled && typeof event.data === 'string') {
-        // In a real implementation, you would decompress here
-        message = JSON.parse(event.data);
-      } else {
-        message = JSON.parse(event.data);
-      }
-
-      // Handle heartbeat responses
-      if (message.type === 'heartbeat' as WebSocketEventType) {
-        this.handleHeartbeatResponse(message);
-        return;
-      }
-
-      // Update connection quality based on message timing
-      this.updateConnectionQuality();
-
-      // Notify subscribers
-      this.notifySubscribers(message);
-      
-    } catch (error) {
-      console.error('Error parsing WebSocket message:', error);
-      this.connectionMetrics.errorCount++;
-    }
-  }
-
-  /**
-   * Notify subscribers of new messages
-   */
-  private notifySubscribers(message: WebSocketMessage): void {
-    this.subscriptions.forEach((callback, subscriptionId) => {
-      try {
-        // Check if subscription matches message type
-        const eventType = subscriptionId.split('_')[0] as WebSocketEventType;
-        if (eventType === message.type || eventType === 'all') {
-          callback(message.data, message);
-        }
-      } catch (error) {
-        console.error('Error in subscription callback:', error);
-      }
-    });
-  }
-
-  /**
-   * Send message through WebSocket
-   */
-  private sendMessage(message: WebSocketMessage): void {
-    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      console.warn('Cannot send message: WebSocket not connected');
-      return;
-    }
-
-    try {
-      let payload: string;
-      
-      // Handle compression if enabled
-      if (this.config.compressionEnabled) {
-        // In a real implementation, you would compress here
-        payload = JSON.stringify(message);
-      } else {
-        payload = JSON.stringify(message);
-      }
-
-      // Check message size
-      if (payload.length > this.config.maxMessageSize) {
-        console.warn('Message size exceeds limit:', payload.length);
-        return;
-      }
-
-      this.ws.send(payload);
-      this.connectionMetrics.messagesSent++;
-      
-    } catch (error) {
-      console.error('Error sending WebSocket message:', error);
-      this.connectionMetrics.errorCount++;
-    }
-  }
-
-  /**
-   * Start heartbeat mechanism
-   */
-  private startHeartbeat(): void {
-    if (this.config.heartbeatInterval <= 0) return;
-
-    this.heartbeatTimer = setInterval(() => {
-      this.sendHeartbeat();
-    }, this.config.heartbeatInterval);
-  }
-
-  /**
-   * Send heartbeat message
-   */
-  private sendHeartbeat(): void {
-    const heartbeatMessage: WebSocketMessage = {
-      type: 'heartbeat' as WebSocketEventType,
-      timestamp: new Date().toISOString(),
-      data: { timestamp: Date.now() }
-    };
-
-    this.lastHeartbeat = new Date();
-    this.sendMessage(heartbeatMessage);
-  }
-
-  /**
-   * Handle heartbeat response
-   */
-  private handleHeartbeatResponse(message: WebSocketMessage): void {
-    if (this.lastHeartbeat) {
-      const latency = Date.now() - message.data.timestamp;
-      this.connectionMetrics.latency = latency;
-      this.updateConnectionQuality();
-    }
-  }
-
-  /**
-   * Update connection quality based on metrics
-   */
-  private updateConnectionQuality(): void {
-    const { latency, errorCount, messagesReceived } = this.connectionMetrics;
-    
-    // Calculate quality based on latency and error rate
-    const errorRate = messagesReceived > 0 ? errorCount / messagesReceived : 0;
-    
-    if (latency < 100 && errorRate < 0.01) {
-      this.connectionQuality = 'excellent';
-    } else if (latency < 300 && errorRate < 0.05) {
-      this.connectionQuality = 'good';
-    } else if (latency < 1000 && errorRate < 0.1) {
-      this.connectionQuality = 'poor';
-    } else {
-      this.connectionQuality = 'unstable';
-    }
-  }
-
-  /**
-   * Calculate reconnection delay with exponential backoff
-   */
-  private calculateReconnectDelay(): number {
-    const { initialDelay, maxDelay, backoffMultiplier, jitterEnabled } = this.config.reconnectStrategy;
-    
-    let delay = initialDelay * Math.pow(backoffMultiplier, this.reconnectAttempts);
-    delay = Math.min(delay, maxDelay);
-    
-    // Add jitter to prevent thundering herd
-    if (jitterEnabled) {
-      delay = delay * (0.5 + Math.random() * 0.5);
-    }
-    
-    return Math.floor(delay);
-  }
-
-  /**
-   * Wait for WebSocket connection to open
-   */
-  private waitForConnection(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if (!this.ws) {
-        reject(new Error('WebSocket not initialized'));
-        return;
-      }
-
-      const timeout = setTimeout(() => {
-        reject(new Error('Connection timeout'));
-      }, 10000); // 10 second timeout
-
-      this.ws.onopen = () => {
-        clearTimeout(timeout);
-        resolve();
-      };
-
-      this.ws.onerror = (error) => {
-        clearTimeout(timeout);
-        reject(error);
-      };
-    });
-  }
-
-  /**
-   * Handle connection errors
-   */
-  private handleConnectionError(error: Error): void {
-    console.error('WebSocket connection error:', error);
-    this.setConnectionStatus('error');
-    this.connectionMetrics.errorCount++;
-    
-    // Emit error event
-    this.emit('connectionError', { error: error.message });
-  }
-
-  /**
-   * Set connection status and emit event
-   */
-  private setConnectionStatus(status: ConnectionStatus): void {
+  private setConnectionStatus(status: ConnectionStatus) {
     if (this.connectionStatus !== status) {
       this.connectionStatus = status;
       this.emit('statusChange', { status });
     }
   }
 
-  /**
-   * Emit event to listeners
-   */
-  private emit(event: string, data: any): void {
-    const listeners = this.eventListeners.get(event);
-    if (listeners) {
-      listeners.forEach(listener => {
-        try {
-          listener(data);
-        } catch (error) {
-          console.error('Error in event listener:', error);
-        }
-      });
+  private sendMessage(message: object) {
+    if (this.connectionStatus === 'connected' && this.ws) {
+      this.ws.send(JSON.stringify(message));
+      this.connectionMetrics.messagesSent++;
+    } else {
+      this.log('Cannot send message, WebSocket not connected.');
     }
   }
 
-  /**
-   * Clear reconnect timer
-   */
-  private clearReconnectTimer(): void {
-    if (this.reconnectTimer) {
-      clearTimeout(this.reconnectTimer);
-      this.reconnectTimer = null;
+  public subscribe(channel: string, callback: (data: any, message: any) => void): string {
+    const id = `sub_${++this.subscriptionCounter}`;
+    this.subscriptions[id] = { channel, callback };
+    this.sendMessage({ type: 'subscribe', channel });
+    return id;
+  }
+
+  public unsubscribe(id: string) {
+    const channel = this.subscriptions[id]?.channel;
+    if (channel) {
+      delete this.subscriptions[id];
+      this.sendMessage({ type: 'unsubscribe', channel });
     }
   }
 
-  /**
-   * Clear heartbeat timer
-   */
-  private clearHeartbeatTimer(): void {
-    if (this.heartbeatTimer) {
-      clearInterval(this.heartbeatTimer);
-      this.heartbeatTimer = null;
+  private startHeartbeat() {
+    if (!this.config.heartbeatEnabled) return;
+    this.stopHeartbeat();
+    this.heartbeatIntervalId = setInterval(() => {
+      this.sendMessage({ type: 'heartbeat', data: { timestamp: Date.now() } });
+    }, this.config.heartbeatInterval);
+  }
+
+  private stopHeartbeat() {
+    if (this.heartbeatIntervalId) {
+      clearInterval(this.heartbeatIntervalId);
+      this.heartbeatIntervalId = null;
     }
+  }
+
+  public getConnectionStatus(): ConnectionStatus {
+    return this.connectionStatus;
+  }
+
+  public getConnectionMetrics(): ConnectionMetrics {
+    return this.connectionMetrics;
+  }
+
+  public getConnectionQuality(): ConnectionQuality {
+      const { latency } = this.connectionMetrics;
+      if (latency < 150) return 'excellent';
+      if (latency < 500) return 'good';
+      if (latency < 1000) return 'poor';
+      return 'unstable';
   }
 }
 
-/**
- * Default WebSocket configuration
- */
 export const DEFAULT_WEBSOCKET_CONFIG: WebSocketConfig = {
-  url: 'wss://api.ic0.app/ws',
-  protocols: ['icp-dashboard-v1'],
-  heartbeatInterval: 30000, // 30 seconds
-  maxMessageSize: 1024 * 1024, // 1MB
-  compressionEnabled: true,
+  url: 'wss://icpdashboard.com/api/v1/ws',
+  protocols: [],
+  heartbeatInterval: 15000,
+  heartbeatEnabled: true,
   reconnectStrategy: {
-    maxAttempts: 10,
-    initialDelay: 1000, // 1 second
-    maxDelay: 30000, // 30 seconds
-    backoffMultiplier: 2,
-    jitterEnabled: true
-  }
+    maxAttempts: 5,
+    initialDelay: 1000,
+    maxDelay: 30000,
+    backoffMultiplier: 1.5,
+    jitterEnabled: true,
+  },
+  maxMessageSize: 1024 * 1024,
+  compressionEnabled: false,
 };
 
-/**
- * Create WebSocket manager instance with default configuration
- */
 export const createWebSocketManager = (config?: Partial<WebSocketConfig>): WebSocketManager => {
   const finalConfig = { ...DEFAULT_WEBSOCKET_CONFIG, ...config };
   return new WebSocketManager(finalConfig);

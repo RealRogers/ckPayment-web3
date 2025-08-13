@@ -11,7 +11,7 @@ import HowItWorksSection from '../../components/HowItWorksSection';
 
 // Mock external dependencies
 const mockToast = jest.fn();
-jest.mock('@/hooks/use-toast', () => ({
+jest.mock('@/components/ui/use-toast', () => ({
   useToast: () => ({
     toast: mockToast,
   }),

@@ -7,17 +7,11 @@ module.exports = {
   // Test environment
   testEnvironment: 'jsdom',
   
-  // Setup files
-  setupFilesAfterEnv: ['<rootDir>/src/tests/setup.ts'],
-  
   // Module paths
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
-    '^@/components/(.*)$': '<rootDir>/src/components/$1',
-    '^@/services/(.*)$': '<rootDir>/src/services/$1',
-    '^@/types/(.*)$': '<rootDir>/src/types/$1',
-    '^@/hooks/(.*)$': '<rootDir>/src/hooks/$1',
-    '^@/utils/(.*)$': '<rootDir>/src/utils/$1',
+    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
+    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': '<rootDir>/src/tests/__mocks__/fileMock.js',
   },
   
   // File extensions
@@ -88,11 +82,6 @@ module.exports = {
     },
   },
   
-  // Mock files
-  moduleNameMapping: {
-    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
-    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': '<rootDir>/src/tests/__mocks__/fileMock.js',
-  },
   
   // Verbose output
   verbose: true,
@@ -109,16 +98,19 @@ module.exports = {
       displayName: 'unit',
       testMatch: ['<rootDir>/src/tests/services/**/*.test.(ts|tsx)'],
       testEnvironment: 'jsdom',
+      setupFilesAfterEnv: ['<rootDir>/src/tests/setup.ts'],
     },
     {
       displayName: 'integration',
       testMatch: ['<rootDir>/src/tests/integration/**/*.test.(ts|tsx)'],
       testEnvironment: 'jsdom',
+      setupFilesAfterEnv: ['<rootDir>/src/tests/setup.ts'],
     },
     {
       displayName: 'e2e',
       testMatch: ['<rootDir>/src/tests/e2e/**/*.test.(ts|tsx)'],
       testEnvironment: 'jsdom',
+      setupFilesAfterEnv: ['<rootDir>/src/tests/setup.ts'],
     },
   ],
   

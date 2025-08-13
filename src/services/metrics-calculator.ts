@@ -196,8 +196,8 @@ export class MetricsCalculator {
     const groups = this.groupByTimeGranularity(filteredTransactions, timeRange.granularity);
     
     groups.forEach((transactions, timeKey) => {
-      const totalCycles = transactions.reduce((sum, tx) => sum + tx.cycleCost, BigInt(0));
-      const averageCycles = transactions.length > 0 ? totalCycles / BigInt(transactions.length) : BigInt(0);
+      const totalCycles = transactions.reduce((sum, tx) => sum + Number(tx.cycleCost), 0);
+      const averageCycles = transactions.length > 0 ? BigInt(Math.round(totalCycles / transactions.length)) : BigInt(0);
       const efficiency = this.calculateCycleEfficiency(transactions);
       const cost = Number(totalCycles) * this.cyclePrice;
 
@@ -226,11 +226,11 @@ export class MetricsCalculator {
     const countMap = new Map<string, number>();
 
     transactions.forEach(tx => {
-      const operation = tx.methodName || tx.type;
+      const operation = tx.methodName || tx.type || tx.status;
       const currentCost = costMap.get(operation) || BigInt(0);
       const currentCount = countMap.get(operation) || 0;
 
-      costMap.set(operation, currentCost + tx.cycleCost);
+      costMap.set(operation, currentCost + BigInt(tx.cycleCost || 0));
       countMap.set(operation, currentCount + 1);
     });
 
@@ -394,8 +394,8 @@ export class MetricsCalculator {
     const margin = Math.sqrt(variance) * 2; // 2 standard deviations
     
     const range = {
-      min: BigInt(Math.max(0, Number(predicted) - margin)),
-      max: BigInt(Number(predicted) + margin)
+      min: BigInt(Math.round(Math.max(0, Number(predicted) - margin))),
+      max: BigInt(Math.round(Number(predicted) + margin))
     };
 
     // Generate recommendations
@@ -663,16 +663,18 @@ export class MetricsCalculator {
   }
 
   private calculatePredictionConfidence(values: number[]): number {
-    if (values.length < 3) return 0.1;
+    if (values.length < 3) return 0;
 
     // Calculate coefficient of variation
     const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
+    if (mean === 0) return 0; // Avoid division by zero
+
     const variance = this.calculateVariance(values);
     const stdDev = Math.sqrt(variance);
     const cv = stdDev / mean;
 
     // Convert to confidence (lower CV = higher confidence)
-    return Math.max(0.1, Math.min(0.95, 1 - cv));
+    return Math.max(0, Math.min(0.95, 1 - cv));
   }
 
   private calculateVariance(values: number[]): number {

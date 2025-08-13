@@ -65,6 +65,7 @@ export class ErrorHandlerService {
       
       // Context information
       context: {
+        ...context,
         userId: this.userId,
         sessionId: this.sessionId,
         canisterId: context.canisterId,
@@ -128,7 +129,7 @@ export class ErrorHandlerService {
     
     // Authentication errors
     if (message.includes('auth') || message.includes('unauthorized') ||
-        message.includes('forbidden') || message.includes('token')) {
+        message.includes('forbidden') || message.includes('token') || message.includes('session expired')) {
       return 'authentication';
     }
     
@@ -304,6 +305,16 @@ export class ErrorHandlerService {
             priority: 2,
             automated: false
           });
+        }
+        if (error.message.toLowerCase().includes('out of cycles')) {
+            actions.push({
+                type: 'contact_support', // Or a more specific type
+                label: 'Top Up Cycles',
+                description: 'Add more cycles to the canister.',
+                action: async () => this.showCycleTopUpDialog(),
+                priority: 1,
+                automated: false,
+            });
         }
         break;
         

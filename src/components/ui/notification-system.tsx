@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback, createContext, useContext } from 'react';
 import { createPortal } from 'react-dom';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+import { Card } from './card';
+import { Button } from './button';
+import { Badge } from './badge';
+import { cn } from '../../lib/utils';
 import { 
   X, 
   CheckCircle, 
@@ -24,7 +24,7 @@ import {
   GlobalNotificationOptions,
   NotificationPosition,
   EnhancedDashboardError
-} from '@/types/dashboard';
+} from '../../types/dashboard';
 
 /**
  * Notification context for managing global state
